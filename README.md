@@ -1,6 +1,7 @@
 # MyPhysicsSimulatorVer2
 
 Let me apologize for my poor English.
+I have been creating the MyPhysics Engine for 7 months by myself.
 
 ## How to use
 1. Supervisor Menu in Edit can delete selected item by right-click on it and change parameters of item.
@@ -18,7 +19,6 @@ From 1 to 4 Menues is around left-top corner and From 5 to 6 buttons is around r
 ![紹介画像２](https://user-images.githubusercontent.com/75087682/112884087-0c7ab180-910a-11eb-9764-b1c679020789.png)
 
 ## Setting
-I have been creating the MyPhysics Engine for 7 months by myself.
 This engine uses below under win32.
 
 - DX12
