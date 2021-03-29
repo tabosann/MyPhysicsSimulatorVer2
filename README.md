@@ -14,4 +14,4 @@ And this engine runs under below circumstances.
 - imgui_impl_dx12.h / .cpp
 
 This engine uses files that ImGui offers, they are in ImGui folder, and d3dx12.h that DirectXTex offers.
-I uses DirectXTex project under DirectXTex_Desktop_2019_Win10.sln. For more details, refer to xxx.com.
+I uses DirectXTex project under DirectXTex_Desktop_2019_Win10.sln. For more details, refer to https://github.com/microsoft/DirectXTex.
