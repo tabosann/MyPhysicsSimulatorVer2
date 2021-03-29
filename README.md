@@ -1,5 +1,7 @@
 # MyPhysicsSimulatorVer2
-Let me apologize for my poor English. 
+
+Let me apologize for my poor English.
+
 ## Setting
 I have been creating the MyPhysics Engine for 7 months by myself.
 This engine uses below under win32.
