@@ -25,3 +25,6 @@ I uses DirectXTex project under DirectXTex_Desktop_2019_Win10.sln. For more deta
 
 From 1 to 4 Menues is around left-top corner. Example below.
 ![衝突テストver2 2021_03_30 1_04_29](https://user-images.githubusercontent.com/75087682/112865846-23aea480-90f4-11eb-9131-46c06d390820.png)
+
+5. Play / Stop switch can play and stop animation.
+6. All Reset button can reset present parameters to first ones.
