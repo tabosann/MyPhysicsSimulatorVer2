@@ -1,0 +1,2 @@
+C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\DirectXTex-master\DirectXTex\Bin\Desktop_2019_Win10\Win32\Debug\DirectXTex.lib
+C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\DirectXTex-master\DirectXTex\Bin\Desktop_2019_Win10\Win32\Debug\DirectXTex.pdb
