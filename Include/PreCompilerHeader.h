@@ -11,7 +11,7 @@
 
 //Windows標準ライブラリ
 #include<Windows.h>
-#include<wrl.h> //Microsoft::WRL::ComPtr使用のため
+#include<wrl.h> //Microsoft::WRL::ComPtr
 
 //DirectX12関連
 #include<d3d12.h>

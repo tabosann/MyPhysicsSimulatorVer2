@@ -8,9 +8,17 @@ int main() {
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #endif
 	Application& app = Application::Instance();
-	if (!app.Init()) {
-		return -1;
+	if (!app.Init()) return -1;
+	//app.Run();
+
+	app.Show();
+	app.Update();
+	while (WndBase::GetCount() != 0)
+	{
+		if (WndBase::HelperForMsgProcess(app)) continue;
+		app.Close(VK_SPACE);
+
+		cout << "*";
 	}
-	app.Run();
-	app.Terminate();
+	app.ShutDown();
 }

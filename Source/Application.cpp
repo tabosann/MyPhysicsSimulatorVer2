@@ -33,6 +33,7 @@
 //ヘルパー
 #include<MyImGui.h>
 #include<MyChar32.h>
+#include"../MyWindowBase/MyWindowBase.h"
 
 //標準のヘッダ群
 #include<tchar.h>
@@ -43,61 +44,33 @@ using namespace std;
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
-//ウィンドウサイズ
-namespace {
+namespace //ウィンドウサイズ
+{
 	constexpr int kWindowWidth = 1280;
 	constexpr int kWindowHeight = 720;
 }
 
-Application::Application() {
+Application::Application() 
+{
 	//特になし
 }
 
-Application::~Application() {
+Application::~Application() 
+{
 	for (int i = 0; i < _rectangles.size(); ++i) delete _rectangles[i];
 	for (int i = 0; i < _spheres.size(); ++i)    delete _spheres[i];
 	vector<MyRectangle*>().swap(_rectangles);
 	vector<MySphere*>().swap(_spheres);
 }
 
-//ウィンドウを生成する
-void Application::InitWindow(HWND& hwnd, WNDCLASSEX& windowClass) {
-	HINSTANCE hInst = GetModuleHandle(nullptr);
-	//ウィンドウクラス生成&登録
-	windowClass.cbSize        = sizeof(WNDCLASSEX);	         //
-	windowClass.lpfnWndProc   = (WNDPROC)ApplicationWndProc; //コールバック関数の指定
-	windowClass.lpszClassName = _T("DirectX12");             //アプリケーションクラス名
-	windowClass.hInstance     = GetModuleHandle(0);          //ハンドルの取得
-	RegisterClassEx(&windowClass);				             //アプリケーションクラス(こういうの作るからよろしくってOSに予告する)
-	
-	RECT wrc = {};
-	wrc.left   = 0;
-	wrc.top    = 0;
-	wrc.right  = kWindowWidth;
-	wrc.bottom = kWindowHeight;
-	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);	//ウィンドウサイズを補正
-
-	hwnd = CreateWindow(
-		windowClass.lpszClassName,
-		_T("衝突テストver2"),
-		WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
-		wrc.right - wrc.left,
-		wrc.bottom - wrc.top,
-		nullptr,
-		nullptr,
-		windowClass.hInstance,
-		this //thisポインタを渡すことで、メンバ関数verのウィンドウプロシージャを受け取るようにしている。
-	);
-}
-
-Application& Application::Instance() {
+Application& Application::Instance()
+{
 	static Application app;
 	return app;
 }
 
-bool Application::Init() {
+bool Application::Init() 
+{
 	auto result = CoInitializeEx(0, COINIT_MULTITHREADED);
 	if (FAILED(result)) return false;
 
@@ -105,7 +78,7 @@ bool Application::Init() {
 	// SECTION: 初期化
 	//----------------------------------------------------------------------------------------------------------------------
 	//メンバ変数の初期化
-	InitWindow(_hwnd, _windowClass);
+	WndBase::Init(_T("MyPhysicsEngine ver0.2"), 0, 0, kWindowWidth, kWindowHeight);
 
 	_dx12.reset(new DX12Wrapper(_hwnd, kWindowWidth, kWindowHeight));
 	if (!_dx12) return false;
@@ -122,8 +95,10 @@ bool Application::Init() {
 	if (!ImGui_ImplWin32_Init(_hwnd))
 		return false;
 
+	DXGI_SWAP_CHAIN_DESC1 desc = {};
+	_dx12->GetSwapChain()->GetDesc1(&desc);
 	if (!ImGui_ImplDX12_Init(
-		_dx12->GetDevice(), 3, DXGI_FORMAT_R8G8B8A8_UNORM,
+		_dx12->GetDevice(), 3, desc.Format,
 		_dx12->GetDescHeapForImGui().Get(), _dx12->GetDescHeapForImGui()->GetCPUDescriptorHandleForHeapStart(),
 		_dx12->GetDescHeapForImGui()->GetGPUDescriptorHandleForHeapStart())
 		)
@@ -165,13 +140,15 @@ bool Application::Init() {
 	return true;
 }
 
-void Application::BeginEdit() {
+void Application::BeginEdit() 
+{
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 }
 
-void Application::EndEdit() {
+void Application::EndEdit() 
+{
 	for (auto rec : _rectangles) rec->Update();
 	for (auto sph : _spheres)    sph->Update();
 
@@ -180,35 +157,32 @@ void Application::EndEdit() {
 	_dx12->Update();
 }
 
-void Application::ImGui_Render() {
+void Application::ImGui_Render()
+{
 	ImGui::Render();
 	_dx12->GetCmdList()->SetDescriptorHeaps(1, _dx12->GetDescHeapForImGui().GetAddressOf());
 }
 
-void Application::Run() {
-	::ShowWindow(_hwnd, SW_SHOW);
-	::UpdateWindow(_hwnd);
-
+void Application::Run()
+{
 	//ウィンドウの設定
 	static ImGuiWindowFlags windowFlags = 0;
 	windowFlags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
 	windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 
-	MSG msg = {};
-	ZeroMemory(&msg, sizeof(msg));
-	while (true) {
+	WndBase::Show();
+	WndBase::Update();
+
+	while (WndBase::GetCount() != 0) {
 		//メッセージ受け取ると0以外の値(= true)を返す。詳細は→ https://bit.ly/3vStQe0
 		//e.g. ウィンドウを閉じるとWM_CLOSEメッセージを受け取るので0以外の値(= true)を返す。
-		if (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-			//ウィンドウプロシージャを呼び出す
-			::TranslateMessage(&msg);
-			::DispatchMessage(&msg);
-
-			if (msg.message == WM_QUIT) break;
+		if (WndBase::CatchMsg())
+		{
+			if (WndBase::GetMsg() == WM_QUIT)
+				WndBase::Quit();
 			continue;
 		}
-
-		CloseWindow(msg);
+		WndBase::Close(VK_SPACE);
 
 		//----------------------------------------------------------------------------------------------------------------------
 		// SECTION: 編集
@@ -395,26 +369,13 @@ void Application::Run() {
 	}
 }
 
-void Application::Terminate() {
+void Application::ShutDown() {
 	//----------------------------------------------------------------------------------------------------------------------
 	// SECTION: リリース
 	//----------------------------------------------------------------------------------------------------------------------
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
-
-	::DestroyWindow(_hwnd);
-	::UnregisterClass(_windowClass.lpszClassName, _windowClass.hInstance);
-}
-
-//Spaceキーを押すとウィンドウを閉じる
-void Application::CloseWindow(MSG& msg) {
-	//キー配列の取得
-	BYTE keyState[256];
-	GetKeyboardState(keyState);
-
-	if (keyState[VK_SPACE])
-		SendMessage(_hwnd, WM_CLOSE, 0, 0); //ウィンドウを閉じる命令
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -566,7 +527,7 @@ void Application::ShowCreatorMenu() {
 	}
 }
 
-LRESULT Application::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 	case WM_SIZE: //ウィンドウリサイズ
 
@@ -602,26 +563,26 @@ LRESULT Application::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) 
 		return 0;
 	}
 
-	ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
-	return ::DefWindowProc(hwnd, msg, wparam, lparam);
+	ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
+	return WndBase::LocalWndProc(hWnd, msg, wParam, lParam);
 }
 
-//lpParam = this にすることで、ウィンドウプロシージャをメンバ関数化できる！
-//静的なウィンドウプロシージャでthisポインタを得ることで実現。詳細は → https://bit.ly/3qNE8Ze
-LRESULT Application::ApplicationWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-
-	Application* app = (Application*)::GetWindowLongPtr(hwnd, GWLP_USERDATA);
-
-	//取得できた場合
-	if (app) return app->WndProc(hwnd, msg, wparam, lparam);
-
-	//取得できなかった場合
-	if (msg == WM_CREATE) {
-		app = (Application*)((LPCREATESTRUCT)lparam)->lpCreateParams;
-		if (app) {
-			::SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)app);
-			return app->WndProc(hwnd, msg, wparam, lparam);
-		}
-	}
-	return ::DefWindowProc(hwnd, msg, wparam, lparam);
-}
+////lpParam = this にすることで、ウィンドウプロシージャをメンバ関数化できる！
+////静的なウィンドウプロシージャでthisポインタを得ることで実現。詳細は → https://bit.ly/3qNE8Ze
+//LRESULT Application::ApplicationWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+//
+//	Application* app = (Application*)::GetWindowLongPtr(hwnd, GWLP_USERDATA);
+//
+//	//取得できた場合
+//	if (app) return app->WndProc(hwnd, msg, wparam, lparam);
+//
+//	//取得できなかった場合
+//	if (msg == WM_CREATE) {
+//		app = (Application*)((LPCREATESTRUCT)lparam)->lpCreateParams;
+//		if (app) {
+//			::SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)app);
+//			return app->WndProc(hwnd, msg, wparam, lparam);
+//		}
+//	}
+//	return ::DefWindowProc(hwnd, msg, wparam, lparam);
+//}

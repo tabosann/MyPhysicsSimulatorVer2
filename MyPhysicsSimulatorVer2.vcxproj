@@ -166,6 +166,7 @@
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MyWindowBase\MyWindowBase.cpp" />
     <ClCompile Include="Source\AABB3.cpp" />
     <ClCompile Include="Source\Application.cpp" />
     <ClCompile Include="Source\BasicObject.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="Include\MyVector3.h" />
     <ClInclude Include="Include\ObjectRenderer.h" />
     <ClInclude Include="Include\PreCompilerHeader.h" />
+    <ClInclude Include="MyWindowBase\MyWindowBase.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">
