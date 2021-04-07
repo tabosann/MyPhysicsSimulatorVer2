@@ -146,9 +146,6 @@
     <ClInclude Include="Include\DirectXTex\d3dx12.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Include\MyImGui_Impl.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="MyHelpers\MyWindowBase.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -159,6 +156,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="MyHelpers\MyVector3.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="MyHelpers\MyImGui_Impl.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

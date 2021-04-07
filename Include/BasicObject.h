@@ -1,7 +1,7 @@
 #pragma once
 
-#include"../MyHelpers/MyVector3.h"
-#include"../MyHelpers/MyChar32.h"
+#include<MyVector3.h>
+#include<MyChar32.h>
 
 class DX12Wrapper;
 class MySphere;

@@ -31,8 +31,8 @@
 #include<Application.h>
 
 //ヘルパー
-#include"../MyHelpers/MyImGui.h"
-#include"../MyHelpers/MyChar32.h"
+#include<MyImGui.h>
+#include<MyChar32.h>
 
 //標準のヘッダ群
 #include<tchar.h>
@@ -54,12 +54,24 @@ Application::Application()
 	//特になし
 }
 
-Application::~Application() 
+DX12Wrapper* Application::GetDX12() const
 {
-	for (int i = 0; i < _rectangles.size(); ++i) delete _rectangles[i];
-	for (int i = 0; i < _spheres.size(); ++i)    delete _spheres[i];
-	vector<MyRectangle*>().swap(_rectangles);
-	vector<MySphere*>().swap(_spheres);
+	return _dx12.get();
+}
+
+ObjectRenderer* Application::GetRenderer() const
+{
+	return _renderer.get();
+}
+
+void Application::SetMainFunc(void(*MainFunc)())
+{
+	_MainFunc = MainFunc;
+}
+
+void Application::SetPlay(bool play)
+{
+	_play = play;
 }
 
 Application& Application::Instance()
@@ -164,10 +176,10 @@ void Application::ImGui_Render()
 
 void Application::Run()
 {
-	//ウィンドウの設定
-	static ImGuiWindowFlags windowFlags = 0;
-	windowFlags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
-	windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
+	////ウィンドウの設定
+	//static ImGuiWindowFlags windowFlags = 0;
+	//windowFlags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
+	//windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 
 	WndBase::Show();
 	WndBase::Update();
@@ -183,9 +195,12 @@ void Application::Run()
 		}
 		WndBase::Close(VK_SPACE);
 
+		_MainFunc();
+
 		//----------------------------------------------------------------------------------------------------------------------
 		// SECTION: 編集
 		//----------------------------------------------------------------------------------------------------------------------
+#if false
 		BeginEdit();
 
 		//==========================================================================================================
@@ -365,6 +380,7 @@ void Application::Run()
 		_dx12->EndRender();
 
 		_dx12->GetSwapChain()->Present(1 /* = 垂直同期あり */, 0);
+#endif
 	}
 }
 
@@ -375,6 +391,14 @@ void Application::ShutDown() {
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+}
+
+Application::~Application()
+{
+	for (int i = 0; i < _rectangles.size(); ++i) delete _rectangles[i];
+	for (int i = 0; i < _spheres.size(); ++i)    delete _spheres[i];
+	vector<MyRectangle*>().swap(_rectangles);
+	vector<MySphere*>().swap(_spheres);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -530,17 +554,17 @@ LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 	switch (msg) {
 	case WM_SIZE: //ウィンドウリサイズ
 
-		DXGI_SWAP_CHAIN_DESC1 desc;
+		DXGI_SWAP_CHAIN_DESC1 desc; ZeroMemory(&desc, sizeof(DXGI_SWAP_CHAIN_DESC1));
 		_dx12->GetSwapChain()->GetDesc1(&desc);
 
-		RECT wrc;
+		RECT wrc; ZeroMemory(&wrc, sizeof(RECT));
 		if (!GetWindowRect(_hwnd, &wrc)) break;
 
 		_dx12->_windowSize.cx = wrc.right - wrc.left;
 		_dx12->_windowSize.cy = wrc.bottom - wrc.top;
 		_dx12->GetSwapChain()->ResizeBuffers(desc.BufferCount, wrc.right - wrc.left, wrc.bottom - wrc.top, desc.Format, desc.Flags);
 		
-		D3D12_VIEWPORT view;
+		D3D12_VIEWPORT view; ZeroMemory(&view, sizeof(D3D12_VIEWPORT));
 		view.Width    = (float)desc.Width;
 		view.Height   = (float)desc.Height;
 		view.TopLeftX = 0.f;
@@ -548,7 +572,7 @@ LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 		view.MaxDepth = 1.f;
 		view.MinDepth = 0.f;
 
-		D3D12_RECT rect;
+		D3D12_RECT rect; ZeroMemory(&rect, sizeof(D3D12_RECT));
 		rect.left   = 0;
 		rect.top    = 0;
 		rect.right  = rect.left + desc.Width;

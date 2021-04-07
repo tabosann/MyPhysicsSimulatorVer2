@@ -1,7 +1,7 @@
 #pragma once
 
 #include"../ImGui/imgui.h"
-#include"../MyHelpers/MyChar32.h"
+#include<MyChar32.h>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -27,4 +27,4 @@ namespace ImGui {
 	const char* CreateUniqueItemName(std::vector<T*>& items, const char* label);
 }
 
-#include<MyImGui_Impl.h>
+#include"MyImGui_Impl.h"

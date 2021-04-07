@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>ImTextureID=ImU64;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\Include;C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\MyHelpers;C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\Include;C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>PreCompilerHeader.h</PrecompiledHeaderFile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <ForcedIncludeFiles>PreCompilerHeader.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
@@ -114,7 +114,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>PreCompilerHeader.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\Include;C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\MyHelpers;C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\Include;C:\Users\kimkim\source\MyProjects\MyPhysicsSimulatorVer2\ImGui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>PreCompilerHeader.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
@@ -182,6 +182,7 @@
     <ClCompile Include="Source\ObjectRenderer.cpp" />
     <ClCompile Include="Source\PreCompilerHeader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -200,7 +201,6 @@
     <ClInclude Include="Include\DirectXTex\d3dx12.h" />
     <ClInclude Include="Include\DX12Utility.h" />
     <ClInclude Include="Include\DX12Wrapper.h" />
-    <ClInclude Include="Include\MyImGui_Impl.h" />
     <ClInclude Include="Include\MyPhysics.h" />
     <ClInclude Include="Include\MyRectangle.h" />
     <ClInclude Include="Include\MySphere.h" />
@@ -208,6 +208,7 @@
     <ClInclude Include="Include\PreCompilerHeader.h" />
     <ClInclude Include="MyHelpers\MyChar32.h" />
     <ClInclude Include="MyHelpers\MyImGui.h" />
+    <ClInclude Include="MyHelpers\MyImGui_Impl.h" />
     <ClInclude Include="MyHelpers\MyVector3.h" />
     <ClInclude Include="MyHelpers\MyWindowBase.h" />
   </ItemGroup>
