@@ -31,9 +31,8 @@
 #include<Application.h>
 
 //ヘルパー
-#include<MyImGui.h>
-#include<MyChar32.h>
-#include"../MyWindowBase/MyWindowBase.h"
+#include"../MyHelpers/MyImGui.h"
+#include"../MyHelpers/MyChar32.h"
 
 //標準のヘッダ群
 #include<tchar.h>
@@ -365,7 +364,7 @@ void Application::Run()
 
 		_dx12->EndRender();
 
-		_dx12->GetSwapChain()->Present(1 /* 垂直同期あり */, 0);
+		_dx12->GetSwapChain()->Present(1 /* = 垂直同期あり */, 0);
 	}
 }
 

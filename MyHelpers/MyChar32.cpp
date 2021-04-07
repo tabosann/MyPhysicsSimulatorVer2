@@ -1,4 +1,4 @@
-#include<MyChar32.h>
+#include"MyChar32.h"
 #include<stdarg.h>
 
 MyChar32::MyChar32(const char str[MyChar32::_kSize]) {

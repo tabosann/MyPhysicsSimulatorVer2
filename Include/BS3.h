@@ -1,6 +1,6 @@
 #pragma once
 
-#include<MyVector3.h>
+#include"../MyHelpers/MyVector3.h"
 
 //Bounding Sphere(‹…Œ^‚Ì“–‚½‚è”»’è)
 class BS3 {

@@ -1,5 +1,5 @@
 #include<DX12Wrapper.h>
-#include<MyVector3.h>
+#include"../MyHelpers/MyVector3.h"
 #include<ObjectRenderer.h>
 #include<DX12Utility.h>
 

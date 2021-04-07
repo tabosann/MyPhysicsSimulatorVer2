@@ -1,5 +1,4 @@
 #include<AABB3.h>
-#include<MyChar32.h>
 #include<MyRectangle.h>
 
 using namespace std;

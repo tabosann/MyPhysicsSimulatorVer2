@@ -1,6 +1,6 @@
 #pragma once
 
-#include"../MyWindowBase/MyWindowBase.h"
+#include"../MyHelpers/MyWindowBase.h"
 
 class DX12Wrapper;
 class ObjectRenderer;

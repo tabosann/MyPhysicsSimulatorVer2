@@ -1,6 +1,6 @@
 #pragma once
 
-#include<MyVector3.h>
+#include"../MyHelpers/MyVector3.h"
 
 //バウンディングボックス(箱型の当たり判定)
 class AABB3 {

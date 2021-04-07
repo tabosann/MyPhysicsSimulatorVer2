@@ -166,23 +166,22 @@
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MyWindowBase\MyWindowBase.cpp" />
+    <ClCompile Include="MyHelpers\MyChar32.cpp" />
+    <ClCompile Include="MyHelpers\MyImGui.cpp" />
+    <ClCompile Include="MyHelpers\MyVector3.cpp" />
+    <ClCompile Include="MyHelpers\MyWindowBase.cpp" />
     <ClCompile Include="Source\AABB3.cpp" />
     <ClCompile Include="Source\Application.cpp" />
     <ClCompile Include="Source\BasicObject.cpp" />
     <ClCompile Include="Source\BS3.cpp" />
     <ClCompile Include="Source\DX12Utility.cpp" />
     <ClCompile Include="Source\DX12Wrapper.cpp" />
-    <ClCompile Include="Source\MyChar32.cpp" />
-    <ClCompile Include="Source\MyImGui.cpp" />
     <ClCompile Include="Source\MyPhysics.cpp" />
     <ClCompile Include="Source\MyRectangle.cpp" />
     <ClCompile Include="Source\MySphere.cpp" />
-    <ClCompile Include="Source\MyVector3.cpp" />
     <ClCompile Include="Source\ObjectRenderer.cpp" />
     <ClCompile Include="Source\PreCompilerHeader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -201,16 +200,16 @@
     <ClInclude Include="Include\DirectXTex\d3dx12.h" />
     <ClInclude Include="Include\DX12Utility.h" />
     <ClInclude Include="Include\DX12Wrapper.h" />
-    <ClInclude Include="Include\MyChar32.h" />
-    <ClInclude Include="Include\MyImGui.h" />
     <ClInclude Include="Include\MyImGui_Impl.h" />
     <ClInclude Include="Include\MyPhysics.h" />
     <ClInclude Include="Include\MyRectangle.h" />
     <ClInclude Include="Include\MySphere.h" />
-    <ClInclude Include="Include\MyVector3.h" />
     <ClInclude Include="Include\ObjectRenderer.h" />
     <ClInclude Include="Include\PreCompilerHeader.h" />
-    <ClInclude Include="MyWindowBase\MyWindowBase.h" />
+    <ClInclude Include="MyHelpers\MyChar32.h" />
+    <ClInclude Include="MyHelpers\MyImGui.h" />
+    <ClInclude Include="MyHelpers\MyVector3.h" />
+    <ClInclude Include="MyHelpers\MyWindowBase.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">

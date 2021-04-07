@@ -48,9 +48,8 @@ public:
 	friend MyVector3 Cross(const MyVector3& a, const MyVector3& b);    //外積
 };
 
-//ゼロベクトル
-//NOTE: constオブジェクトはデフォルトが内部結合なので
-//    : extern宣言を用いて、外部結合（他のファイルからも見えるよう）にする。
+// NOTE: constオブジェクトはデフォルトが内部結合なので
+//     : extern宣言を用いて、外部結合（他のファイルからも見えるよう）にする。
 extern const MyVector3 kZeroVec;
 using MyVec3 = MyVector3;
 
