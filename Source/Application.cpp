@@ -52,6 +52,7 @@ namespace //ウィンドウサイズ
 Application::Application() 
 {
 	//特になし
+	_MainFunc = []()->void {};
 }
 
 DX12Wrapper* Application::GetDX12() const
@@ -67,11 +68,6 @@ ObjectRenderer* Application::GetRenderer() const
 void Application::SetMainFunc(void(*MainFunc)())
 {
 	_MainFunc = MainFunc;
-}
-
-void Application::SetPlay(bool play)
-{
-	_play = play;
 }
 
 Application& Application::Instance()
@@ -193,7 +189,9 @@ void Application::Run()
 				WndBase::Quit();
 			continue;
 		}
-		WndBase::Close(VK_SPACE);
+
+		if (WndBase::Close(VK_SPACE))
+			continue;
 
 		_MainFunc();
 
@@ -404,9 +402,10 @@ Application::~Application()
 //----------------------------------------------------------------------------------------------------------------------
 // SECTION: ImGui関数群
 //----------------------------------------------------------------------------------------------------------------------
-void Application::ShowDebugConsoleMenu() {
+void Application::ShowDebugConsoleMenu() 
+{
 	XMFLOAT4 clearColor4 = _dx12->_bgColor;
-	float fov            = _dx12->_fov;
+	float    fov         = _dx12->_fov;
 	XMFLOAT3 camera3     = _dx12->_cameraPos;
 	XMFLOAT4 lightDir4   = _dx12->_lightDir;
 
@@ -421,7 +420,8 @@ void Application::ShowDebugConsoleMenu() {
 	_dx12->_lightDir = lightDir4;
 }
 
-void Application::ShowSupervisorMenu() {
+void Application::ShowSupervisorMenu() 
+{
 	//フォーカスしたアイテムの名前と番号
 	static Char32 selectedLabel;
 	BasicObject*  selectedItem = nullptr;
@@ -498,8 +498,8 @@ void Application::ShowSupervisorMenu() {
 	ImGui::EndChild(); //str_id = "Right"
 }
 
-void Application::ShowCreatorMenu() {
-
+void Application::ShowCreatorMenu() 
+{
 	vector<BasicObject*> itemList;
 	itemList.insert(itemList.begin(), _rectangles.cbegin(), _rectangles.cend());
 	itemList.insert(itemList.begin() + itemList.size(), _spheres.cbegin(), _spheres.cend());
@@ -550,8 +550,10 @@ void Application::ShowCreatorMenu() {
 	}
 }
 
-LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-	switch (msg) {
+LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
+{
+	switch (msg) 
+	{
 	case WM_SIZE: //ウィンドウリサイズ
 
 		DXGI_SWAP_CHAIN_DESC1 desc; ZeroMemory(&desc, sizeof(DXGI_SWAP_CHAIN_DESC1));

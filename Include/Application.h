@@ -27,7 +27,6 @@ public:
 	ObjectRenderer* GetRenderer() const;
 
 	void SetMainFunc(void(*MainFunc)());
-	void SetPlay(bool play);
 
 	static Application& Instance();
 	bool Init();
@@ -48,7 +47,6 @@ private:
 
 	unique_ptr<DX12Wrapper>    _dx12 = nullptr;
 	unique_ptr<ObjectRenderer> _renderer = nullptr;
-	bool                       _play = false;
 
 	//独自のウィンドウプロシージャ
 	LRESULT LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
