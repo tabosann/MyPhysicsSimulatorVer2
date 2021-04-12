@@ -123,7 +123,8 @@ bool Application::Init()
 void Application::Run()
 {
 	//衝突検知時にアニメーションを停止する
-	void (*StopWhenCollided)(bool& dst, bool src) = [](bool& dst, bool src)->void {
+	void (*StopWhenCollided)(bool& dst, bool src) = [](bool& dst, bool src)->void
+	{
 		dst = !src && dst;
 	};
 
@@ -175,14 +176,14 @@ void Application::Run()
 				float     step = 0;     //衝突時刻
 
 				//球と球の衝突が起きたらtrue
-				bool isCollision = s1->_bs3->IntersectsBS3(
+				bool collided = s1->_bs3->IntersectsBS3(
 					s1->_acc, s1->_vel, s1->_pos, s1->_r, s1->_dt,
 					s2->_acc, s2->_vel, s2->_pos, s2->_r, s2->_dt,
 					out_v1, out_v2, out_p1, out_p2, step
 				);
 
 				//衝突が起こらなければ、衝突処理をスキップ
-				if (!isCollision) continue;
+				if (!collided) continue;
 				//算出した衝突時刻のほうが大きければ、衝突処理をスキップ
 				if (step >= s1->_t || step >= s2->_t) continue;
 
@@ -212,30 +213,30 @@ void Application::Run()
 			for (auto s : _spheres) {
 			for (auto r : _rectangles) {
 
-				MyVec3 outPlaneNormal; //平面の法線
-				MyVec3 outPosOnPlane;  //平面上の点
-				MyVec3 outPos;         //衝突時の球体の位置
-				MyVec3 outVel;         //衝突時の球体の速度
-				float  step = 0;       //衝突時刻
+				MyVec3 out_planeNormal; //平面の法線
+				MyVec3 out_posOnPlane;  //平面上の点
+				MyVec3 out_pos;         //衝突時の球体の位置
+				MyVec3 out_vel;         //衝突時の球体の速度
+				float  step = 0;        //衝突時刻
 
 				MyVec3 rayOrg = s->GetPositionIn(s->_dt, s->_acc, s->_vel - r->_vel);
 				MyVec3 rayDir = rayOrg - s->_pos;
-				r->_aabb3->GetPlane(s->_pos, rayDir, outPlaneNormal, outPosOnPlane);
+				r->_aabb3->GetPlane(s->_pos, rayDir, out_planeNormal, out_posOnPlane);
 
-				bool isCollision = r->_aabb3->IntersectsBS3(
+				bool collided = r->_aabb3->IntersectsBS3(
 					s->_acc, s->_vel - r->_vel, s->_pos, s->_r, s->_dt,
-					outPosOnPlane, outPlaneNormal.Normalize(), outVel, outPos, step
+					out_posOnPlane, out_planeNormal.Normalize(), out_vel, out_pos, step
 				);
 
-				if (!isCollision) continue;
+				if (!collided) continue;
 				if (step >= s->_t || step >= r->_t) continue;
 
 				StopWhenCollided(play, stopWhenCollided);
 
 				r->_t = s->_t = step;
-				s->_tempPos = outPos;
+				s->_tempPos = out_pos;
 				s->_tempVel = MyPhysics::CalcReflectionVector(
-					outVel, r->GetVelocityIn(r->_dt), outPlaneNormal.Normalize(), s->_e
+					out_vel, r->GetVelocityIn(r->_dt), out_planeNormal.Normalize(), s->_e
 				);
 			}}
 
