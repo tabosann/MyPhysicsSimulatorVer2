@@ -104,7 +104,7 @@ HRESULT ObjectRenderer::CreateGraphicPipeline(const D3D12_INPUT_ELEMENT_DESC* in
 
 	//頂点シェーダファイル読み込み
 	HRESULT result = D3DCompileFromFile(
-		L"VertexShader.hlsl", //NOTE: ワイド文字列
+		L"VertexShader.hlsl", // NOTE: ワイド文字列
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		"VS", "vs_5_0",

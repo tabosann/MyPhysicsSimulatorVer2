@@ -20,4 +20,4 @@
 #include<DirectXMath.h>
 
 //DirectX12ヘルパーライブラリ
-#include"DirectXTex/d3dx12.h"
+#include<d3dx12.h>
