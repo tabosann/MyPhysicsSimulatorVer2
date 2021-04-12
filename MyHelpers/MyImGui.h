@@ -5,13 +5,15 @@
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-namespace ImGui {
+namespace ImGui
+{
 	bool IsAtShiftTrueToFalse(bool judge);
 	void HelpMarker(const char* desc);
 }
 
 //テンプレート関数群
-namespace ImGui {
+namespace ImGui
+{
 	template<class T>
 	void SafeDelete(std::vector<T*>& items);
 	template<class T>

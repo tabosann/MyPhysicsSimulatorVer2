@@ -3,11 +3,6 @@
 using namespace std;
 using namespace DirectX;
 
-namespace 
-{
-	const float kPi = 3.14159265f;
-}
-
 BS3::BS3(FMyVec3& c, float r) 
 	:_c(c), _r(r)
 {}
@@ -35,7 +30,8 @@ bool BS3::IntersectsBS3(
 	FMyVec3& p1_first, FMyVec3& p1_last, float r1, 
 	FMyVec3& p2_first, FMyVec3& p2_last, float r2, 
 	MyVec3* outPos1, MyVec3* outPos2, float* outStep
-) {
+)
+{
 	FMyVec3 kE = p2_first - p1_first; //Eベクトル
 	FMyVec3 kD = p1_last - p1_first;  //Dベクトル
 
@@ -73,7 +69,8 @@ bool BS3::IntersectsBS3(
 	FMyVec3& p1_first, FMyVec3& p1_last, float r1,
 	FMyVec3& p2_first, FMyVec3& p2_last, float r2,
 	MyVec3& outV1, MyVec3& outV2, MyVec3& outP1, MyVec3& outP2, float& outStep
-) const {
+) const
+{
 	#define SPHERE_POS1_AT(t) (p1_first + t * (p1_last - p1_first))
 	#define SPHERE_POS2_AT(t) (p2_first + t * (p2_last - p2_first))
 	#define DELTA_SPHERE_POS_AT(t) (SPHERE_POS2_AT(t) - SPHERE_POS1_AT(t))

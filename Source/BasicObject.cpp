@@ -12,11 +12,8 @@ BasicObject::BasicObject(DX12Wrapper* dx12, const Char32& name, const MyVec3& si
 	assert(SUCCEEDED(result));
 }
 
-BasicObject::~BasicObject() {
-
-}
-
-HRESULT BasicObject::CreateVertexBufferView(Vertex* begin, Vertex* end, size_t sizeOfVertices) {
+HRESULT BasicObject::CreateVertexBufferView(Vertex* begin, Vertex* end, size_t sizeOfVertices)
+{
 	//バッファ作成
 	HRESULT result;
 	_vertexBuffer = CreateResourceBuffer(_dx12, result, sizeOfVertices);
@@ -41,7 +38,8 @@ HRESULT BasicObject::CreateVertexBufferView(Vertex* begin, Vertex* end, size_t s
 	return result;
 }
 
-HRESULT BasicObject::CreateIndexBufferView(unsigned short* begin, unsigned short* end, size_t sizeOfIndices) {
+HRESULT BasicObject::CreateIndexBufferView(unsigned short* begin, unsigned short* end, size_t sizeOfIndices)
+{
 	//バッファの作成
 	HRESULT result;
 	_indexBuffer = CreateResourceBuffer(_dx12, result, sizeOfIndices);
@@ -66,11 +64,13 @@ HRESULT BasicObject::CreateIndexBufferView(unsigned short* begin, unsigned short
 	return result;
 }
 
-void BasicObject::Update() {
+void BasicObject::Update()
+{
 	//特になし
 }
 
-void BasicObject::Render() const {
+void BasicObject::Render() const
+{
 	_dx12->GetCmdList()->IASetVertexBuffers(0, 1, &_vertexBufferView);
 	_dx12->GetCmdList()->IASetIndexBuffer(&_indexBufferView);
 
@@ -83,7 +83,8 @@ void BasicObject::Render() const {
 	_dx12->GetCmdList()->DrawIndexedInstanced(_indexBufferView.SizeInBytes / sizeof(unsigned short), 1, 0, 0, 0);
 }
 
-HRESULT BasicObject::CreateTransformViewWithCBV() {
+HRESULT BasicObject::CreateTransformViewWithCBV()
+{
 	//バッファの作成
 	HRESULT result;
 	_transformBuffer = CreateResourceBufferForCBV(_dx12, result, sizeof(Transform));
@@ -110,6 +111,12 @@ HRESULT BasicObject::CreateTransformViewWithCBV() {
 	return result;
 }
 
-void* BasicObject::Transform::operator new(size_t size) {
+void* BasicObject::Transform::operator new(size_t size)
+{
 	return _aligned_malloc(size, 16);
+}
+
+BasicObject::~BasicObject()
+{
+	//特になし
 }

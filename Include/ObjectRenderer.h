@@ -2,21 +2,24 @@
 
 class DX12Wrapper;
 
-class ObjectRenderer {
+class ObjectRenderer
+{
 	template<typename T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 public:
-	//@param dx12 DX12Wrapperクラスオブジェクト
+
 	ObjectRenderer(DX12Wrapper* dx12);
-	virtual ~ObjectRenderer();
 
 	ID3D12PipelineState* GetGraphicPipeline() const;
 	ID3D12RootSignature* GetRootSignature() const;
 
 	void Update();
 
+	virtual ~ObjectRenderer();
+
 private:
+
 	//１つの頂点に載せる情報
 	static constexpr D3D12_INPUT_ELEMENT_DESC _inputLayout[3] = {
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},

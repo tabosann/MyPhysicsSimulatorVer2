@@ -5,11 +5,10 @@
 using namespace std;
 using namespace Microsoft::WRL;
 
-#define SET_MY_ORIGINAL_DESCRIPTOR_TABLE
+#define SET_MY_ORIGINAL_DESCRIPTOR_TABLE false
 
-//デバッグ関数
-//NOTE: 関数名の接頭辞をCheck...にすること。
-namespace {
+namespace
+{
 	bool CheckShaderCompileResult(HRESULT result, ID3DBlob* error);
 }
 
@@ -23,22 +22,21 @@ ObjectRenderer::ObjectRenderer(DX12Wrapper* dx12)
 	assert(SUCCEEDED(result));
 }
 
-ObjectRenderer::~ObjectRenderer() {
-
-}
-
 ID3D12PipelineState*
-ObjectRenderer::GetGraphicPipeline() const {
+ObjectRenderer::GetGraphicPipeline() const
+{
 	return _graphicPipeline.Get();
 }
 
 ID3D12RootSignature*
-ObjectRenderer::GetRootSignature() const {
+ObjectRenderer::GetRootSignature() const
+{
 	return _rootSignature.Get();
 }
 
-HRESULT ObjectRenderer::CreateRootSignature() {
-#ifndef SET_MY_ORIGINAL_DESCRIPTOR_TABLE
+HRESULT ObjectRenderer::CreateRootSignature()
+{
+#if SET_MY_ORIGINAL_DESCRIPTOR_TABLE
 	//FIXME: 何故か自作のディスクリプタテーブルだとエラーが起きる...
 	D3D12_DESCRIPTOR_RANGE descriptorRanges[2];
 	//'SceneData'構造体のデータ
@@ -97,7 +95,8 @@ HRESULT ObjectRenderer::CreateRootSignature() {
 	return result;
 }
 
-HRESULT ObjectRenderer::CreateGraphicPipeline(const D3D12_INPUT_ELEMENT_DESC* inputLayout, size_t numElements, UINT numRenderTargets) {
+HRESULT ObjectRenderer::CreateGraphicPipeline(const D3D12_INPUT_ELEMENT_DESC* inputLayout, size_t numElements, UINT numRenderTargets)
+{
 	ID3DBlob* vsBlob = nullptr;
 	ID3DBlob* psBlob = nullptr;
 	ID3DBlob* errorBlob = nullptr;
@@ -109,11 +108,10 @@ HRESULT ObjectRenderer::CreateGraphicPipeline(const D3D12_INPUT_ELEMENT_DESC* in
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		"VS", "vs_5_0",
 		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-		0,
-		&vsBlob, &errorBlob);
-	if (!CheckShaderCompileResult(result, errorBlob)) {
+		0, &vsBlob, &errorBlob
+	);
+	if (!CheckShaderCompileResult(result, errorBlob))
 		assert(SUCCEEDED(result));
-	}
 
 	//ピクセルシェーダファイル読み込み
 	result = D3DCompileFromFile(
@@ -122,61 +120,61 @@ HRESULT ObjectRenderer::CreateGraphicPipeline(const D3D12_INPUT_ELEMENT_DESC* in
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		"PS", "ps_5_0",
 		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-		0,
-		&psBlob, &errorBlob);
-	if (!CheckShaderCompileResult(result, errorBlob)) {
+		0, &psBlob, &errorBlob
+	);
+	if (!CheckShaderCompileResult(result, errorBlob))
 		assert(SUCCEEDED(result));
-	}
 
 	//グラフィックスパイプラインの設定と作成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC  graphicsPipelineDesc = {};
 	//ルートシグネチャ
-	graphicsPipelineDesc.pRootSignature = _rootSignature.Get();
+	graphicsPipelineDesc.pRootSignature     = _rootSignature.Get();
 	//シェーダ関連
 	graphicsPipelineDesc.VS.pShaderBytecode = vsBlob->GetBufferPointer();
-	graphicsPipelineDesc.VS.BytecodeLength = vsBlob->GetBufferSize();
+	graphicsPipelineDesc.VS.BytecodeLength  = vsBlob->GetBufferSize();
 	graphicsPipelineDesc.PS.pShaderBytecode = psBlob->GetBufferPointer();
-	graphicsPipelineDesc.PS.BytecodeLength = psBlob->GetBufferSize();
+	graphicsPipelineDesc.PS.BytecodeLength  = psBlob->GetBufferSize();
 	//サンプルマスク関連
 	graphicsPipelineDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
 	//ブレンド関連
-	graphicsPipelineDesc.BlendState.AlphaToCoverageEnable = false;
+	graphicsPipelineDesc.BlendState.AlphaToCoverageEnable  = false;
 	graphicsPipelineDesc.BlendState.IndependentBlendEnable = false;
 	D3D12_RENDER_TARGET_BLEND_DESC renderDesc = {};
 	{
-		renderDesc.BlendEnable = false;
-		renderDesc.LogicOpEnable = false;
+		renderDesc.BlendEnable           = false;
+		renderDesc.LogicOpEnable         = false;
 		renderDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	}
 	graphicsPipelineDesc.BlendState.RenderTarget[0] = renderDesc;
 	//ラスタライザ(描画のルール)関連
 	graphicsPipelineDesc.RasterizerState.MultisampleEnable = false;
-	graphicsPipelineDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
-	graphicsPipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
-	graphicsPipelineDesc.RasterizerState.DepthClipEnable = true;
+	graphicsPipelineDesc.RasterizerState.CullMode          = D3D12_CULL_MODE_NONE;
+	graphicsPipelineDesc.RasterizerState.FillMode          = D3D12_FILL_MODE_SOLID;
+	graphicsPipelineDesc.RasterizerState.DepthClipEnable   = true;
 	//深度値関連
-	graphicsPipelineDesc.DepthStencilState.DepthEnable = true;
-	graphicsPipelineDesc.DepthStencilState.StencilEnable = false;
+	graphicsPipelineDesc.DepthStencilState.DepthEnable    = true;
+	graphicsPipelineDesc.DepthStencilState.StencilEnable  = false;
 	graphicsPipelineDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	graphicsPipelineDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-	graphicsPipelineDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+	graphicsPipelineDesc.DepthStencilState.DepthFunc      = D3D12_COMPARISON_FUNC_LESS;
+	graphicsPipelineDesc.DSVFormat                        = DXGI_FORMAT_D32_FLOAT;
 	//レイアウト関連
 	graphicsPipelineDesc.InputLayout.pInputElementDescs = inputLayout;
-	graphicsPipelineDesc.InputLayout.NumElements = numElements;
+	graphicsPipelineDesc.InputLayout.NumElements        = numElements;
 	//描画(の手法)関連
-	graphicsPipelineDesc.IBStripCutValue = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
+	graphicsPipelineDesc.IBStripCutValue       = D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_DISABLED;
 	graphicsPipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	//レンダーターゲット関連
 	{
 		DXGI_SWAP_CHAIN_DESC1 desc = {};
 		_dx12->GetSwapChain()->GetDesc1(&desc);
+
 		graphicsPipelineDesc.NumRenderTargets = numRenderTargets;
-		graphicsPipelineDesc.RTVFormats[0] = desc.Format;
+		graphicsPipelineDesc.RTVFormats[0]    = desc.Format;
 	}
 	//その他
-	graphicsPipelineDesc.SampleDesc.Count = 1;
+	graphicsPipelineDesc.SampleDesc.Count   = 1;
 	graphicsPipelineDesc.SampleDesc.Quality = 0;
-	graphicsPipelineDesc.NodeMask = 0;
+	graphicsPipelineDesc.NodeMask           = 0;
 
 	result = _dx12->GetDevice()->CreateGraphicsPipelineState(
 		&graphicsPipelineDesc, IID_PPV_ARGS(_graphicPipeline.ReleaseAndGetAddressOf())
@@ -186,15 +184,24 @@ HRESULT ObjectRenderer::CreateGraphicPipeline(const D3D12_INPUT_ELEMENT_DESC* in
 	return result;
 }
 
-void ObjectRenderer::Update() {
+void ObjectRenderer::Update()
+{
 	//特になし
 }
 
-namespace {
-	bool CheckShaderCompileResult(HRESULT result, ID3DBlob* error) {
+ObjectRenderer::~ObjectRenderer()
+{
+	//特になし
+}
+
+namespace 
+{
+	bool CheckShaderCompileResult(HRESULT result, ID3DBlob* error)
+	{
 		if (SUCCEEDED(result)) return true;
 
-		if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND)) {
+		if (result == HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND))
+		{
 			OutputDebugStringA("ファイルが見当たりません");
 			return false;
 		}

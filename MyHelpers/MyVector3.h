@@ -4,20 +4,18 @@
 // - update ver0.222 : DirectX::XMVECTORクラスに対応しました。
 class MyVector3 : public DirectX::XMFLOAT3 
 {
-	using XMFLOAT3 = DirectX::XMFLOAT3;
-	using XMVECTOR = DirectX::XMVECTOR;
-
 public:
+
 	MyVector3(float x, float y, float z);
 	MyVector3();
 	MyVector3(const MyVector3& v);
-	MyVector3(const XMFLOAT3& v);
-	MyVector3(const XMVECTOR& v);
+	MyVector3(const DirectX::XMFLOAT3& v);
+	MyVector3(const DirectX::XMVECTOR& v);
 
 	//代入演算
 	MyVector3& operator=(const MyVector3& v);
-	MyVector3& operator=(const XMFLOAT3& v);
-	MyVector3& operator=(const XMVECTOR& v);
+	MyVector3& operator=(const DirectX::XMFLOAT3& v);
+	MyVector3& operator=(const DirectX::XMVECTOR& v);
 
 	//反転演算
 	MyVector3 operator-() const;
@@ -40,8 +38,8 @@ public:
 	friend bool operator!=(const MyVector3& a, const MyVector3& b);
 
 	//キャスト演算子
-	operator XMVECTOR();
-	operator XMVECTOR() const;
+	operator DirectX::XMVECTOR();
+	operator DirectX::XMVECTOR() const;
 
 	//ゼロベクトルにセット
 	MyVector3 Zero();

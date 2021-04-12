@@ -11,12 +11,14 @@ class MySphere;
 //・頂点バッファビュー
 //・インデックスバッファビュー
 //・アフィン変換行列
-class BasicObject {
+class BasicObject
+{
 	template<typename T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
 
 	//フレーム毎にアップデートされるデータを扱う構造体
-	struct Transform {
+	struct Transform
+	{
 		//NOTE: DirectX::XMMATRIXが16の倍数バイトのみを扱うので
 		//    : 16の倍数にアライメントしなければいけない。
 		void* operator new(size_t size);
@@ -25,10 +27,12 @@ class BasicObject {
 	};
 
 public:
+
 	//１つの頂点に載せる情報
 	//NOTE: Vertex構造体を変更したら'_inputLayout'配列も変更すること
-	struct Vertex {
-		DirectX::XMFLOAT3 pos;	  //位置[m]
+	struct Vertex
+	{
+		DirectX::XMFLOAT3 pos;	 //位置[m]
 		DirectX::XMFLOAT3 normal; //法線ベクトル
 		DirectX::XMFLOAT3 color;  //色(R, G, B)
 	};
@@ -45,7 +49,6 @@ public:
 
 	//@param dx12 : DX12Wrapperクラスオブジェクト
 	BasicObject(DX12Wrapper* dx12, const Char32& name, const MyVec3& size, float m, float e, const MyVec3& col);
-	virtual ~BasicObject();
 
 	//用意された頂点データをシェーダに渡す準備をする
 	HRESULT CreateVertexBufferView(Vertex* begin, Vertex* end, size_t sizeOfVertices);
@@ -56,7 +59,10 @@ public:
 	virtual void Render() const;
 	virtual void Adjuster() = 0;
 
+	virtual ~BasicObject();
+
 private:
+
 	//コマンドリストとデバイスの取得に使用
 	DX12Wrapper*                 _dx12;
 	//物体を構成する頂点とインデックスの準備

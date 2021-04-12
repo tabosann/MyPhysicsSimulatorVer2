@@ -105,7 +105,7 @@ void MySphere::Adjuster()
 	float  cef    = _e;
 	int    frames = 1.f / _dt + 0.5f;
 
-	if (ImGui::InputText  ("Name"  , name.data(), Char32::_kSize)) _name  = name;
+	if (ImGui::InputText  ("Name"  , name.data(), Char32::_kLength)) _name  = name;
 	if (ImGui::InputFloat3("Accel" , &acc.x))                _acc   = acc;
 	if (ImGui::InputFloat3("Veloc" , &vel.x))                _vel   = vel;
 	if (ImGui::InputFloat3("Posit" , &pos.x))                _pos   = pos;

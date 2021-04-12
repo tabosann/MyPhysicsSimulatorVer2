@@ -34,7 +34,7 @@ MyVector3& MyVector3::operator=(const MyVector3& v)
 	return *this;
 }
 
-MyVector3& MyVector3::operator=(const DirectX::XMFLOAT3& v)
+MyVector3& MyVector3::operator=(const XMFLOAT3& v)
 {
 	x = v.x;
 	y = v.y;
@@ -96,12 +96,12 @@ bool operator!=(const MyVector3& a, const MyVector3& b)
 	return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
-MyVector3::operator XMVECTOR()
+MyVector3::operator DirectX::XMVECTOR()
 {
 	return XMLoadFloat3(this);
 }
 
-MyVector3::operator XMVECTOR() const
+MyVector3::operator DirectX::XMVECTOR() const
 {
 	return XMLoadFloat3(this);
 }

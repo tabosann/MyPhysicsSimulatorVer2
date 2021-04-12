@@ -2,10 +2,8 @@
 
 class DX12Wrapper;
 
-namespace DX12Util {
-	template<class T>
-	using ComPtr = Microsoft::WRL::ComPtr<T>;
-
+namespace DX12Util
+{
 	//©ì‚ÌDX12ƒwƒ‹ƒp[ŠÖ”
 	Microsoft::WRL::ComPtr<ID3D12Resource>
 	CreateResourceBuffer(DX12Wrapper* dx12, HRESULT& result, UINT64 bufferSize);

@@ -461,7 +461,7 @@ void Application::ShowCreatorMenu()
 	//BeginTabBar(): ラベル付けのようで使いやすい
 	if (ImGui::BeginTabBar("GameObjectTabs")) {
 		if (ImGui::BeginTabItem("Rectangle")) {
-			static Char32 label("Rectangle");   ImGui::InputText  ("Name"   , label.data(), Char32::_kSize);
+			static Char32 label("Rectangle");   ImGui::InputText  ("Name"   , label.data(), Char32::_kLength);
 			static MyVec3 acl(0.f, -9.8f, 0.f); ImGui::InputFloat3("Accel"  , &acl.x);
 			static MyVec3 vel;                  ImGui::InputFloat3("Veloc"  , &vel.x);
 			static MyVec3 pos;                  ImGui::InputFloat3("Posit"  , &pos.x);
@@ -481,7 +481,7 @@ void Application::ShowCreatorMenu()
 		}
 
 		if (ImGui::BeginTabItem("Sphere")) {
-			static Char32 label("Sphere");      ImGui::InputText  ("Name"   , label.data(), Char32::_kSize);
+			static Char32 label("Sphere");      ImGui::InputText  ("Name"   , label.data(), Char32::_kLength);
 			static MyVec3 acl(0.f, -9.8f, 0.f); ImGui::InputFloat3("Accel"  , &acl.x);
 			static MyVec3 vel;                  ImGui::InputFloat3("Veloc"  , &vel.x);
 			static MyVec3 pos;                  ImGui::InputFloat3("Posit"  , &pos.x);

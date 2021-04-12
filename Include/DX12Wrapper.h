@@ -4,17 +4,14 @@ class DX12Wrapper
 {
 	template<class T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
-	using XMFLOAT3 = DirectX::XMFLOAT3;
-	using XMFLOAT4 = DirectX::XMFLOAT4;
-	using XMMATRIX = DirectX::XMMATRIX;
 
 public:
 
-	SIZE     _windowSize;
-	XMFLOAT4 _bgColor;
-	float    _fov;
-	XMFLOAT3 _cameraPos;
-	XMFLOAT4 _lightDir; //アライメント防止のXMFLOAT4
+	SIZE              _windowSize;
+	DirectX::XMFLOAT4 _bgColor;
+	float             _fov;
+	DirectX::XMFLOAT3 _cameraPos;
+	DirectX::XMFLOAT4 _lightDir; //アライメント防止のDirectX::XMFLOAT4
 
 	DX12Wrapper(HWND hwnd, int width, int height);
 
@@ -35,10 +32,10 @@ public:
 
 private:
 
-	XMFLOAT4 _initBgColor;
-	float    _initFov;
-	XMFLOAT3 _initCamera;
-	XMFLOAT4 _initLightDir;
+	DirectX::XMFLOAT4 _initBgColor;
+	float             _initFov;
+	DirectX::XMFLOAT3 _initCamera;
+	DirectX::XMFLOAT4 _initLightDir;
 
 	//DXGI関連
 	ComPtr<IDXGIFactory6>   _dxgiFactory = nullptr;
@@ -61,11 +58,12 @@ private:
 	D3D12_RECT     _scissorRect = {}; //ビューポート範囲内でさらに描画範囲を設定する
 
 	//ビュープロジェクション関連
-	struct SceneData {
-		XMMATRIX view;
-		XMMATRIX proj;
-		XMFLOAT3 eyePos;
-		XMFLOAT4 lightDir;
+	struct SceneData
+	{
+		DirectX::XMMATRIX view;
+		DirectX::XMMATRIX proj;
+		DirectX::XMFLOAT3 eyePos;
+		DirectX::XMFLOAT4 lightDir;
 	};
 	SceneData*                   _mapSceneData = nullptr;
 	ComPtr<ID3D12Resource>       _sceneBuffer = nullptr;

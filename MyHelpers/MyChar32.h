@@ -1,10 +1,12 @@
 #pragma once
 
-class MyChar32 {
+class MyChar32
+{
 public:
-	static constexpr int _kSize = 32;
 
-	MyChar32(const char str[_kSize] = "");
+	static constexpr int _kLength = 32;
+
+	MyChar32(const char str[_kLength] = "");
 	MyChar32(const MyChar32& str);
 
 	MyChar32& operator= (const MyChar32& str);
@@ -19,7 +21,9 @@ public:
 	static void Copy(MyChar32& dst, const char* src, ...);
 
 private:
-	char _str[_kSize];
+
+	char _str[_kLength];
 };
 
 using Char32 = MyChar32;
+using FChar32 = const Char32;

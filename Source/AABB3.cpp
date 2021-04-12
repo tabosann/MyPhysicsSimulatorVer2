@@ -4,36 +4,41 @@
 
 using namespace std;
 
-namespace {
+namespace 
+{
 	float EnforceValueIntoRange(float min, float max, float target);
 	int   Range(unsigned int seed, int min, int max);
 }
 
-AABB3::AABB3(const MyVector3& min, const MyVector3& max) 
+AABB3::AABB3(FMyVec3& min, FMyVec3& max) 
 	:_min(min), _max(max)
 {}
 
 AABB3::AABB3()
-	:AABB3(MyVector3(FLT_MAX, FLT_MAX, FLT_MAX), MyVector3(-FLT_MAX, -FLT_MAX, -FLT_MAX))
+	:AABB3(MyVec3(FLT_MAX, FLT_MAX, FLT_MAX), MyVec3(-FLT_MAX, -FLT_MAX, -FLT_MAX))
 {}
 
-MyVector3 AABB3::GetCenterPos() const {
+MyVec3 AABB3::GetCenterPos() const
+{
 	return (_max + _min) / 2;
 }
 
-MyVector3 AABB3::GetSizeVec() const {
+MyVec3 AABB3::GetSizeVec() const
+{
 	return _max - _min;
 }
 
-MyVector3 AABB3::GetRadiusVec() const {
+MyVec3 AABB3::GetRadiusVec() const
+{
 	return (_max - _min) / 2;
 }
 
-MyVector3 AABB3::GetCorner(int i) const {
+MyVec3 AABB3::GetCorner(int i) const
+{
 	//インデックスが範囲内であるかチェック
 	assert(0 <= i && i < 8);
 
-	return MyVector3(
+	return MyVec3(
 		(i & 0x2) ? _max.x : _min.y, //i == 2,3,6,7
 		(i & 0x1) ? _max.y : _min.y, //i == 1,3,5,7
 		(i & 0x4) ? _max.z : _min.z  //i == 4,5,6,7
@@ -45,9 +50,10 @@ MyVector3 AABB3::GetCorner(int i) const {
 //@param outPlaneNormal : 平面の法線
 //@param outPosOnPlane : 平面上の点
 void AABB3::GetPlane(
-	const MyVector3& rayOrg, const MyVector3& rayDir,
-	MyVector3& outPlaneNormal, MyVector3& outPosOnPlane
-) const {
+	FMyVec3& rayOrg, FMyVec3& rayDir,
+	MyVec3& outPlaneNormal, MyVec3& outPosOnPlane
+) const
+{
 	function<void(float, float, float&, float&)> Dist;
 	Dist = [=](float min, float max, float& d, float& n)->void {
 		if (d < min) {
@@ -91,26 +97,28 @@ void AABB3::GetPlane(
 
 	switch (whichPlane) {
 	case 0: //yz平面
-		outPlaneNormal = MyVector3(nx, 0, 0);
-		outPosOnPlane = MyVector3(nx < 0 ? _min.x : _max.x, 0, 0);
+		outPlaneNormal = MyVec3(nx, 0, 0);
+		outPosOnPlane = MyVec3(nx < 0 ? _min.x : _max.x, 0, 0);
 		break;
 	case 1: //xz平面
-		outPlaneNormal = MyVector3(0, ny, 0);
-		outPosOnPlane = MyVector3(0, ny < 0 ? _min.y : _max.y, 0);
+		outPlaneNormal = MyVec3(0, ny, 0);
+		outPosOnPlane = MyVec3(0, ny < 0 ? _min.y : _max.y, 0);
 		break;
 	case 2: //xy平面
-		outPlaneNormal = MyVector3(0, 0, nz);
-		outPosOnPlane = MyVector3(0, 0, nz < 0 ? _min.z : _max.z);
+		outPlaneNormal = MyVec3(0, 0, nz);
+		outPosOnPlane = MyVec3(0, 0, nz < 0 ? _min.z : _max.z);
 		break;
 	}
 }
 
-bool AABB3::IsEmpty() const {
+bool AABB3::IsEmpty() const
+{
 	//いずれかの成分で _min > _max であれば空とみなす。
 	return _min.x > _max.x || _min.y > _max.y || _min.z > _max.z;
 }
 
-void AABB3::Add(MyVector3 add) {
+void AABB3::Add(MyVec3 add)
+{
 	//最小値の更新
 	if (add.x < _min.x) _min.x = add.x;
 	if (add.y < _min.y) _min.y = add.y;
@@ -122,8 +130,9 @@ void AABB3::Add(MyVector3 add) {
 	if (add.z > _max.z) _max.z = add.z;
 }
 
-MyVector3 AABB3::Closest(const MyVector3& pos) const {
-	return MyVector3(
+MyVec3 AABB3::Closest(FMyVec3& pos) const
+{
+	return MyVec3(
 		EnforceValueIntoRange(_min.x, _max.x, pos.x),
 		EnforceValueIntoRange(_min.y, _max.y, pos.y),
 		EnforceValueIntoRange(_min.z, _max.z, pos.z)
@@ -135,9 +144,10 @@ MyVector3 AABB3::Closest(const MyVector3& pos) const {
 //@param outNormal : 法線を受け取る
 //@param t : 交差点を示すパラメータを受け取る
 bool AABB3::RayIntersect(
-	const MyVector3& rayOrg, const MyVector3& rayDir,
-	MyVector3* outNormal, MyVector3* outColPos, float* t
-) const {
+	FMyVec3& rayOrg, FMyVec3& rayDir,
+	MyVec3* outNormal, MyVec3* outColPos, float* t
+) const
+{
 	//交差が存在しなければ巨大な数を返す
 	const float kNoIntersect = 1e30f;
 	*t = kNoIntersect;
@@ -242,7 +252,7 @@ bool AABB3::RayIntersect(
 		if (z < _min.z || _max.z < z) return false;
 
 		//if (outNormal != nullptr) break;
-		*outNormal = MyVector3(nx, 0, 0);
+		*outNormal = MyVec3(nx, 0, 0);
 
 		break;
 	case 1: //xz平面
@@ -252,7 +262,7 @@ bool AABB3::RayIntersect(
 		if (z < _min.z || _max.z < z) return false;
 		
 		//if (outNormal != nullptr) break;
-		*outNormal = MyVector3(0, ny, 0);
+		*outNormal = MyVec3(0, ny, 0);
 
 		break;
 	case 2: //xy平面
@@ -262,7 +272,7 @@ bool AABB3::RayIntersect(
 		if (y < _min.y || _max.y < y) return false;
 
 		//if (outNormal != nullptr) break;
-		*outNormal = MyVector3(0, 0, nz);
+		*outNormal = MyVec3(0, 0, nz);
 
 		break;
 	}
@@ -280,10 +290,11 @@ bool AABB3::RayIntersect(
 //@param outSpherePos : 衝突の瞬間の球体の位置
 //@param outStep : 衝突時刻
 bool AABB3::IntersectsBS3(
-	const MyVector3& spherePos0, const MyVector3& spherePos1, float sphereRadius,
-	const MyVector3& posOnPlane, const MyVector3& normal,
-	MyVector3& outSpherePos, float& outStep
-) const {
+	FMyVec3& spherePos0, FMyVec3& spherePos1, float sphereRadius,
+	FMyVec3& posOnPlane, FMyVec3& normal,
+	MyVec3& outSpherePos, float& outStep
+) const
+{
 	//dot_dir_normal < 0: 球体の進行方向が平面に向かっているので衝突が起こる
 	//dot_dir_normal = 0: 球体の進行方向が平面と平行なので衝突は起こらない
 	//dot_dir_normal > 0: 球体の進行方向が平面から遠ざかっているので衝突は起こらない
@@ -307,7 +318,7 @@ bool AABB3::IntersectsBS3(
 	outSpherePos = spherePos0 + outStep * (spherePos1 - spherePos0);
 
 	//算出した衝突位置からAABB3までの最短距離が球の半径より大きければfalse
-	MyVector3 closest = AABB3::Closest(outSpherePos);
+	MyVec3 closest = AABB3::Closest(outSpherePos);
 	if (Magnitude(outSpherePos - closest) > sphereRadius) return false;
 
 	//めり込んでいるなら過去の時間に戻す
@@ -322,10 +333,11 @@ bool AABB3::IntersectsBS3(
 }
 
 bool AABB3::IntersectsBS3(
-	const MyVector3& acc, const MyVector3& vel, const MyVector3& pos, float radius, float step, 
-	const MyVector3& posOnPlane, const MyVector3& normal, MyVector3& outVel, MyVector3& outPos, float& outStep
-) const {
-	const MyVector3 kNext = pos + vel * step + 0.5f * acc * step * step;
+	FMyVec3& acc, FMyVec3& vel, FMyVec3& pos, float radius, float step, 
+	FMyVec3& posOnPlane, FMyVec3& normal, MyVec3& outVel, MyVec3& outPos, float& outStep
+) const
+{
+	FMyVec3 kNext = pos + vel * step + 0.5f * acc * step * step;
 	float dot_dir_normal = Dot(kNext - pos, normal);
 	//平面と球体までの最短距離
 	float distPlaneToSphere = fabs(Dot(pos - posOnPlane, normal));
@@ -334,7 +346,7 @@ bool AABB3::IntersectsBS3(
 	const float kEPS = 1e-10f; //このくらいの値が妥当
 	if (fabs(dot_dir_normal) < kEPS && distPlaneToSphere < radius) {
 		outStep = 1e30f; //いくら待っても衝突しないので、衝突時刻は巨大な数を返す
-		outVel  = MyVector3(vel.x, 0.f, vel.z);
+		outVel  = MyVec3(vel.x, 0.f, vel.z);
 		outPos  = pos + outVel * step; //加速度を無視してそれっぽく見せる
 		return true;
 	}
@@ -361,16 +373,19 @@ bool AABB3::IntersectsBS3(
 	return false;
 }
 
-namespace {
+namespace
+{
 	//'target'の値を[min, max]の範囲に収める
-	float EnforceValueIntoRange(float min, float max, float target) {
+	float EnforceValueIntoRange(float min, float max, float target)
+	{
 		if (target < min) return min;
 		if (target > max) return max;
 		return target;
 	}
 
 	//[min, max]の範囲でランダムな値を返す。seed値でランダム規則を変更
-	int Range(unsigned int seed, int min, int max) {
+	int Range(unsigned int seed, int min, int max)
+	{
 		srand(seed * (unsigned int)time(NULL));
 		return min + rand() % (max - min + 1);
 	}

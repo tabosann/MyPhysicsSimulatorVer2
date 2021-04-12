@@ -7,20 +7,12 @@ class ObjectRenderer;
 class MyRectangle;
 class MySphere;
 
-//シングルトン設計
-//DX12ライブラリの初期化を行い、ウィンドウの作成も行う。
-//'_dx12'を共有することで、作成したウィンドウ上への操作を許可する。
 class Application : public WndBase
 {
-	template<class T>
-	using vector = std::vector<T>;
-	template<class T>
-	using unique_ptr = std::unique_ptr<T>;
-
 public:
 
-	vector<MyRectangle*> _rectangles; //直方体のオブジェクト
-	vector<MySphere*>	 _spheres;    //球体のオブジェクト
+	std::vector<MyRectangle*> _rectangles; //直方体のオブジェクト
+	std::vector<MySphere*>	  _spheres;    //球体のオブジェクト
 
 	//アプリケーション関数群
 	static Application& Instance();
@@ -38,8 +30,8 @@ public:
 
 private:
 
-	unique_ptr<DX12Wrapper>    _dx12 = nullptr;
-	unique_ptr<ObjectRenderer> _renderer = nullptr;
+	std::unique_ptr<DX12Wrapper>    _dx12 = nullptr;
+	std::unique_ptr<ObjectRenderer> _renderer = nullptr;
 
 	void BeginEdit();
 	void EndEdit();
