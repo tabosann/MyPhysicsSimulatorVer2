@@ -17,117 +17,166 @@ MyVector3::MyVector3(const MyVector3& v)
 	:XMFLOAT3(v.x, v.y, v.z)
 {}
 
-MyVector3::MyVector3(const DirectX::XMFLOAT3& v)
+MyVector3::MyVector3(const XMFLOAT3& v)
 	:XMFLOAT3(v.x, v.y, v.z)
 {}
 
-MyVector3& MyVector3::operator=(const MyVector3& v) {
-	this->x = v.x;
-	this->y = v.y;
-	this->z = v.z;
+MyVector3::MyVector3(const XMVECTOR & v)
+{
+	XMStoreFloat3(this, v);
+}
+
+MyVector3& MyVector3::operator=(const MyVector3& v)
+{
+	x = v.x;
+	y = v.y;
+	z = v.z;
 	return *this;
 }
 
-MyVector3& MyVector3::operator=(const DirectX::XMFLOAT3& v) {
-	*this = MyVector3(v.x, v.y, v.z);
+MyVector3& MyVector3::operator=(const DirectX::XMFLOAT3& v)
+{
+	x = v.x;
+	y = v.y;
+	z = v.z;
 	return *this;
 }
 
-MyVector3 MyVector3::operator-() const {
+MyVector3& MyVector3::operator=(const XMVECTOR& v)
+{
+	XMStoreFloat3(this, v);
+	return *this;
+}
+
+MyVector3 MyVector3::operator-() const
+{
 	return MyVector3(-x, -y, -z);
 }
 
-MyVector3& MyVector3::operator+=(const MyVector3& v) {
+MyVector3& MyVector3::operator+=(const MyVector3& v)
+{
 	x += v.x;
 	y += v.y;
 	z += v.z;
 	return *this;
 }
 
-MyVector3& MyVector3::operator-=(const MyVector3& v) {
+MyVector3& MyVector3::operator-=(const MyVector3& v)
+{
 	x -= v.x;
 	y -= v.y;
 	z -= v.z;
 	return *this;
 }
 
-MyVector3& MyVector3::operator*=(float val) {
+MyVector3& MyVector3::operator*=(float val)
+{
 	x *= val;
 	y *= val;
 	z *= val;
 	return *this;
 }
 
-MyVector3& MyVector3::operator/=(float val) {
-	x /= val;
-	y /= val;
-	z /= val;
+MyVector3& MyVector3::operator/=(float val)
+{
+	val = 1.f / val;
+	x *= val;
+	y *= val;
+	z *= val;
 	return *this;
 }
 
-bool operator==(const MyVector3& a, const MyVector3& b) {
+bool operator==(const MyVector3& a, const MyVector3& b)
+{
 	return a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-bool MyVector3::operator!=(const MyVector3& v) {
-	return x != v.x || y != v.y || z != v.z;
+bool operator!=(const MyVector3& a, const MyVector3& b)
+{
+	return a.x != b.x || a.y != b.y || a.z != b.z;
 }
 
-MyVector3 MyVector3::Zero() {
-	x = y = z = 0.0f;
+MyVector3::operator XMVECTOR()
+{
+	return XMLoadFloat3(this);
+}
+
+MyVector3::operator XMVECTOR() const
+{
+	return XMLoadFloat3(this);
+}
+
+MyVector3 MyVector3::Zero()
+{
+	x = y = z = 0.f;
 	return *this;
 }
 
-MyVector3 
-operator+(const MyVector3& a, const MyVector3& b) {
+MyVector3 operator+(const MyVector3& a, const MyVector3& b)
+{
 	return MyVector3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-MyVector3
-operator-(const MyVector3& a, const MyVector3& b) {
+MyVector3 operator-(const MyVector3& a, const MyVector3& b) 
+{
 	return MyVector3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-MyVector3 
-operator*(float val, const MyVector3& v) {
+MyVector3 operator*(float val, const MyVector3& v)
+{
 	return MyVector3(val * v.x, val * v.y, val * v.z);
 }
 
-MyVector3 
-operator*(const MyVector3& v, float val) {
+MyVector3 operator*(const MyVector3& v, float val)
+{
 	return val * v;
 }
 
-MyVector3 operator/(const MyVector3& v, float val) {
-	return MyVector3(v.x / val, v.y / val, v.z / val);
+MyVector3 operator/(const MyVector3& v, float val)
+{
+	val = 1.f / val;
+	return MyVector3(v.x * val, v.y * val, v.z * val);
 }
 
-float MyVector3::Magnitude() const {
-	return sqrtf(x * x + y * y + z * z);
+float MyVector3::Magnitude() const 
+{
+	return XMVector3Length(*this).m128_f32[0];
+	//return sqrtf(x * x + y * y + z * z);
 }
 
-float Magnitude(const MyVector3 & v) {
-	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+float Magnitude(const MyVector3 & v)
+{
+	return XMVector3Length(v).m128_f32[0];
+	//return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
-MyVector3 MyVector3::Normalize() const {
-	return *this / this->Magnitude();
+MyVector3 MyVector3::Normalize() const
+{
+	return *this / Magnitude();
 }
 
-MyVector3 Normalize(const MyVector3& v) {
+MyVector3 Normalize(const MyVector3& v)
+{
 	return v / v.Magnitude();
 }
 
-float Distance(const MyVector3& a, const MyVector3& b) {
+float Distance(const MyVector3& a, const MyVector3& b)
+{
 	return Magnitude(b - a);
 }
 
-float Dot(const MyVector3 & a, const MyVector3 & b) {
-	return a.x * b.x + a.y * b.y + a.z * b.z;
+float Dot(const MyVector3 & a, const MyVector3 & b) 
+{
+	return XMVector3Dot(a, b).m128_f32[0];
+	//return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-MyVector3 Cross(const MyVector3& a, const MyVector3& b) {
+MyVector3 Cross(const MyVector3& a, const MyVector3& b) 
+{
+	return XMVector3Cross(a,b);
+	/*
 	return MyVector3(a.y * b.z - b.y * a.z,
 					 a.z * b.x - b.z * a.x,
 					 a.x * b.y - b.x * a.y);
+	*/
 }

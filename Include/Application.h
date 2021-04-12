@@ -21,32 +21,28 @@ public:
 
 	vector<MyRectangle*> _rectangles; //直方体のオブジェクト
 	vector<MySphere*>	 _spheres;    //球体のオブジェクト
-	void (*_MainFunc)();              //メインループ内で行う任意の処理
 
-	DX12Wrapper*    GetDX12() const;
-	ObjectRenderer* GetRenderer() const;
-
-	void SetMainFunc(void(*MainFunc)());
-
+	//アプリケーション関数群
 	static Application& Instance();
 	bool Init();
-	void BeginEdit();
-	void EndEdit();
-	void ImGui_Render();
 	void Run();
 	void ShutDown();
 
-	virtual ~Application();
-
 	//ImGui関数群
+	void ImGui_Render();
 	void ShowDebugConsoleMenu();
 	void ShowSupervisorMenu();
 	void ShowCreatorMenu();
+
+	virtual ~Application();
 
 private:
 
 	unique_ptr<DX12Wrapper>    _dx12 = nullptr;
 	unique_ptr<ObjectRenderer> _renderer = nullptr;
+
+	void BeginEdit();
+	void EndEdit();
 
 	//独自のウィンドウプロシージャ
 	LRESULT LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

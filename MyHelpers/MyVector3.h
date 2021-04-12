@@ -1,16 +1,23 @@
 #pragma once
 
 //DirectX::XMFLOAT3クラスの各種演算を可能にしたクラス
-class MyVector3 : public DirectX::XMFLOAT3 {
+// - update ver0.222 : DirectX::XMVECTORクラスに対応しました。
+class MyVector3 : public DirectX::XMFLOAT3 
+{
+	using XMFLOAT3 = DirectX::XMFLOAT3;
+	using XMVECTOR = DirectX::XMVECTOR;
+
 public:
 	MyVector3(float x, float y, float z);
 	MyVector3();
 	MyVector3(const MyVector3& v);
-	MyVector3(const DirectX::XMFLOAT3& v);
+	MyVector3(const XMFLOAT3& v);
+	MyVector3(const XMVECTOR& v);
 
 	//代入演算
 	MyVector3& operator=(const MyVector3& v);
-	MyVector3& operator=(const DirectX::XMFLOAT3& v);
+	MyVector3& operator=(const XMFLOAT3& v);
+	MyVector3& operator=(const XMVECTOR& v);
 
 	//反転演算
 	MyVector3 operator-() const;
@@ -30,7 +37,11 @@ public:
 
 	//評価演算子
 	friend bool operator==(const MyVector3& a, const MyVector3& b);
-	bool operator!=(const MyVector3& v);
+	friend bool operator!=(const MyVector3& a, const MyVector3& b);
+
+	//キャスト演算子
+	operator XMVECTOR();
+	operator XMVECTOR() const;
 
 	//ゼロベクトルにセット
 	MyVector3 Zero();
@@ -51,8 +62,10 @@ public:
 // NOTE: constオブジェクトはデフォルトが内部結合なので
 //     : extern宣言を用いて、外部結合（他のファイルからも見えるよう）にする。
 extern const MyVector3 kZeroVec;
-using MyVec3 = MyVector3;
+using MyVec3  = MyVector3;
+using FMyVec3 = const MyVec3; // F = Fixed(固定的な)
 
-inline std::ostream& operator << (std::ostream& os, const MyVector3& v) {
+inline std::ostream& operator << (std::ostream& os, const MyVector3& v)
+{
 	return os << '(' << v.x << ',' << v.y << ',' << v.z << ')';
 }

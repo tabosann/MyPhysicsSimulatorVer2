@@ -6,25 +6,22 @@ class MyWindowBase
 {
 public:
 
-	int _x, _y, _width, _height;
-	LPCWSTR _name;
-
 	MyWindowBase();
 	virtual ~MyWindowBase();
 
+	POINT      GetWindowPos() const;
+	SIZE       GetWindowSize() const;
 	UINT       GetMsg() const;
 	static int GetCount();
 
-	bool Init(LPCWSTR name, int posX = 0, int posY = 0, int width = 0, int height = 0);
+	bool Init(LPCWSTR name, LONG pos_x = 0, LONG pos_y = 0, LONG width = 0, LONG height = 0);
 	bool Show() const;
 	bool Update() const;
-	bool Close(unsigned short key) const;
-	bool CatchMsg();
+	void Close(unsigned short key) const;
 	void Quit();
 	bool ShutDown() const;
 
-	static bool    HelperForMsgProcess(MyWindowBase& wnd);
-	static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	static void MsgProcessor(MyWindowBase* wnd);
 
 protected:
 
@@ -34,8 +31,12 @@ protected:
 private:
 
 	static int _count;
+	LONG       _x, _y, _w, _h;
+	LPCWSTR    _name;
 	WNDCLASSEX _wndClass = {};
 	MSG        _msg = {};
+
+	static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 	MyWindowBase(const MyWindowBase&) = delete;
 	MyWindowBase& operator=(const MyWindowBase&) = delete;

@@ -29,3 +29,5 @@
 #include"../ImGui/imgui_impl_dx12.h"
 
 #pragma comment(lib, "DirectXTex.lib")
+
+#define _USE_DEVELOP_VER_ false

@@ -7,9 +7,16 @@ using namespace DirectX;
 int MyRectangle::_id = 0;
 
 MyRectangle::MyRectangle(
-	DX12Wrapper* dx12, const Char32& name,
-	const MyVec3& acc, const MyVec3& vel, const MyVec3& pos, const MyVec3& size,
-	float m, float e, int frames, const MyVec3& col
+	DX12Wrapper*  dx12, 
+	const Char32& name,
+	const MyVec3& acc, 
+	const MyVec3& vel, 
+	const MyVec3& pos, 
+	const MyVec3& size,
+	float         m, 
+	float         e, 
+	int           frames, 
+	const MyVec3& col
 )
 	:BasicObject(dx12, name, size, m, e, col), MyPhysics(frames, acc, vel, pos),
 	 _t(1.f), _tempPos(pos), _tempVel(vel)
@@ -33,17 +40,24 @@ MyRectangle::MyRectangle(
 }
 
 MyRectangle::MyRectangle(
-	DX12Wrapper* dx12,
-	const MyVec3& acc, const MyVec3& vel, const MyVec3& pos, const MyVec3& size,
-	float m, float e, int frames, const MyVec3& col
+	DX12Wrapper*  dx12,
+	const MyVec3& acc, 
+	const MyVec3& vel, 
+	const MyVec3& pos, 
+	const MyVec3& size,
+	float         m, 
+	float         e, 
+	int           frames, 
+	const MyVec3& col
 )
 	:MyRectangle(dx12, "", acc, vel, pos, size, m, e, frames, col)
 {
-	Char32::Copy(_name, "Rectangle(%d)", MyRectangle::_id++);
+	Char32::Copy(_name, "Rectangle(%d)", _id++);
 }
 
-HRESULT MyRectangle::CreateVertexBufferView() {
-	BasicObject::Vertex verticesOfRectangle[] = {
+HRESULT MyRectangle::CreateVertexBufferView() 
+{
+	Vertex vertices[] = {
 		//前面
 		//[位置]				[法線]				  [色RGB]
 		{ XMFLOAT3(-1, -1, -1), XMFLOAT3( 0,  0, -1), XMFLOAT3( 1,  1,  1) },
@@ -77,12 +91,12 @@ HRESULT MyRectangle::CreateVertexBufferView() {
 		{ XMFLOAT3( 1, -1,  1), XMFLOAT3( 0, -1,  0), XMFLOAT3( 1,  1,  1) }
 	};
 
-	return BasicObject::CreateVertexBufferView(
-		begin(verticesOfRectangle), end(verticesOfRectangle), sizeof(verticesOfRectangle));
+	return BasicObject::CreateVertexBufferView(begin(vertices), end(vertices), sizeof(vertices));
 }
 
-HRESULT MyRectangle::CreateIndexBufferView() {
-	unsigned short indicesOfRectangle[] = {
+HRESULT MyRectangle::CreateIndexBufferView() 
+{
+	unsigned short indices[] = {
 		//前面
 		0,1,2,2,1,3,
 		//右側面
@@ -97,37 +111,43 @@ HRESULT MyRectangle::CreateIndexBufferView() {
 		20,21,22,22,21,23
 	};
 
-	return BasicObject::CreateIndexBufferView(
-		begin(indicesOfRectangle), end(indicesOfRectangle), sizeof(indicesOfRectangle));
+	return BasicObject::CreateIndexBufferView(begin(indices), end(indices), sizeof(indices));
 }
 
-void MyRectangle::BeginCalc() {
+void MyRectangle::BeginCalc() 
+{
 	_t = 1.f;
 	_tempPos = GetPositionIn(_dt);
 	_tempVel = GetVelocityIn(_dt);
 }
 
-void MyRectangle::Update() {
-	//物体の大きさ、位置を設定
+void MyRectangle::Update()
+{
+	//物体の大きさ、位置を更新
 	_mappedTransform->world  = XMMatrixIdentity();
 	_mappedTransform->world *= XMMatrixScaling(_size.x * 0.5f, _size.y * 0.5f, _size.z * 0.5f);
 	_mappedTransform->world *= XMMatrixTranslation(_pos.x, _pos.y, _pos.z);
-	//物体の色を設定
+	//物体の色を更新
 	_mappedTransform->color.x = _color.x;
 	_mappedTransform->color.y = _color.y;
 	_mappedTransform->color.z = _color.z;
 }
 
-void MyRectangle::EndCalc() {
+void MyRectangle::EndCalc()
+{
 	_pos = _tempPos;
 	_vel = _tempVel;
 	_aabb3->_min = _pos - _size * 0.5f;
 	_aabb3->_max = _pos + _size * 0.5f;
 }
 
-void MyRectangle::Render() const { BasicObject::Render(); }
+void MyRectangle::Render() const 
+{ 
+	BasicObject::Render(); 
+}
 
-void MyRectangle::Adjuster() {
+void MyRectangle::Adjuster() 
+{
 	Char32 name   = _name;
 	MyVec3 acc    = _acc;
 	MyVec3 vel    = _vel;
@@ -139,17 +159,18 @@ void MyRectangle::Adjuster() {
 	int    frames = 1.f / _dt + 0.5f;
 
 	if (ImGui::InputText  ("Name"  , name.data(), Char32::_kSize)) _name  = name;
-	if (ImGui::InputFloat3("Accel" , &acc.x))                _acc   = acc;
-	if (ImGui::InputFloat3("Veloc" , &vel.x))                _vel   = vel;
-	if (ImGui::InputFloat3("Posit" , &pos.x))                _pos   = pos;
-	if (ImGui::InputFloat3("Size"  , &size.x))               _size  = size;
-	if (ImGui::InputFloat ("Mass"  , &mass))                 _m     = mass;
-	if (ImGui::DragFloat  ("Coeff" , &cef, 5e-3f, 0.f, 1.f)) _e     = cef;
-	if (ImGui::InputInt   ("Frames", &frames))               _dt    = 1.f / frames;
-	if (ImGui::ColorEdit3 ("Color" , &col.x))                _color = col;
+	if (ImGui::InputFloat3("Accel" , &acc.x))                      _acc   = acc;
+	if (ImGui::InputFloat3("Veloc" , &vel.x))                      _vel   = vel;
+	if (ImGui::InputFloat3("Posit" , &pos.x))                      _pos   = pos;
+	if (ImGui::InputFloat3("Size"  , &size.x))                     _size  = size;
+	if (ImGui::InputFloat ("Mass"  , &mass))                       _m     = mass;
+	if (ImGui::DragFloat  ("Coeff" , &cef, 5e-3f, 0.f, 1.f))       _e     = cef;
+	if (ImGui::InputInt   ("Frames", &frames))                     _dt    = 1.f / frames;
+	if (ImGui::ColorEdit3 ("Color" , &col.x))                      _color = col;
 }
 
-void MyRectangle::Reset() {
+void MyRectangle::Reset() 
+{
 	_acc   = _init_acc;
 	_vel   = _init_vel;
 	_pos   = _init_pos;

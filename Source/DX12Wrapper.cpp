@@ -11,9 +11,11 @@ using namespace Microsoft::WRL;
 
 const float kSkyColor4[4] = { 0.290196f, 0.372549f, 0.501961f, 1.f };
 
-namespace {
+namespace 
+{
 	//NOTE: デバイス作成後にデバッグレイヤーを有効化してはならない。デバイスが取り除かれてしまう。
-	void EnableDebugLayer() {
+	void EnableDebugLayer()
+	{
 		ComPtr<ID3D12Debug> debugLayer;
 		if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugLayer.ReleaseAndGetAddressOf())))) {
 			debugLayer->EnableDebugLayer();
@@ -21,7 +23,8 @@ namespace {
 	}
 }
 
-DX12Wrapper::DX12Wrapper(HWND hwnd, int windowWidth, int windowHeight) {
+DX12Wrapper::DX12Wrapper(HWND hwnd, int windowWidth, int windowHeight) 
+{
 #ifdef ENABLE_DXGI_DEBUGLAYER_FOR_DX12
 	::EnableDebugLayer();
 #endif
@@ -56,12 +59,14 @@ DX12Wrapper::DX12Wrapper(HWND hwnd, int windowWidth, int windowHeight) {
 	assert(SUCCEEDED(result));
 }
 
-DX12Wrapper::~DX12Wrapper() {
+DX12Wrapper::~DX12Wrapper()
+{
 	for (int i = 0; i < _backBuffers.size(); ++i) _backBuffers[i]->Release();
 	vector<ID3D12Resource*>().swap(_backBuffers);
 }
 
-HRESULT DX12Wrapper::CreateDXGIAndDevice(const wstring& targetAdapterName) {
+HRESULT DX12Wrapper::CreateDXGIAndDevice(const wstring& targetAdapterName)
+{
 	//最初はDXGIの初期化が必須
 #ifdef _DEBUG
 	//デバッグ時、デバッグ情報を表示するようにする
@@ -114,7 +119,8 @@ HRESULT DX12Wrapper::CreateDXGIAndDevice(const wstring& targetAdapterName) {
 	return result;
 }
 
-HRESULT DX12Wrapper::CreateCommandFlow() {
+HRESULT DX12Wrapper::CreateCommandFlow()
+{
 	//コマンドアロケータの作成
 	auto result = _device->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(_commandAllocator.ReleaseAndGetAddressOf())
@@ -140,7 +146,8 @@ HRESULT DX12Wrapper::CreateCommandFlow() {
 }
 
 HRESULT
-DX12Wrapper::CreateSwapChain(const HWND& hwnd, int windowWidth, int windowHeight) {
+DX12Wrapper::CreateSwapChain(const HWND& hwnd, int windowWidth, int windowHeight)
+{
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc1 = {};
 	swapChainDesc1.Format = DXGI_FORMAT_R8G8B8A8_UNORM;				//１ピクセルを0.0~1.0の256段階で表現
 	swapChainDesc1.BufferUsage = DXGI_USAGE_BACK_BUFFER;			//
@@ -171,7 +178,8 @@ DX12Wrapper::CreateSwapChain(const HWND& hwnd, int windowWidth, int windowHeight
 }
 
 HRESULT
-DX12Wrapper::CreateFinalRenderTarget() {
+DX12Wrapper::CreateFinalRenderTarget()
+{
 	//ウィンドウサイズを取得するためにスワップチェーンの説明文を取得
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc1;
 	auto result = _swapChain->GetDesc1(&swapChainDesc1);
@@ -228,8 +236,8 @@ DX12Wrapper::CreateFinalRenderTarget() {
 	return S_OK;
 }
 
-HRESULT
-DX12Wrapper::CreateDepthStencilView() {
+HRESULT DX12Wrapper::CreateDepthStencilView()
+{
 	D3D12_HEAP_PROPERTIES depthHeapProp = {};
 	depthHeapProp.Type = D3D12_HEAP_TYPE_DEFAULT;
 	depthHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -288,8 +296,8 @@ DX12Wrapper::CreateDepthStencilView() {
 	return S_OK;
 }
 
-HRESULT
-DX12Wrapper::CreateSceneDataViewWithCBV() {
+HRESULT DX12Wrapper::CreateSceneDataViewWithCBV()
+{
 	D3D12_HEAP_PROPERTIES sceneHeapProp = {};
 	sceneHeapProp.Type = D3D12_HEAP_TYPE_UPLOAD;
 	sceneHeapProp.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -361,10 +369,17 @@ DX12Wrapper::CreateSceneDataViewWithCBV() {
 	return S_OK;
 }
 
+void DX12Wrapper::SetSceneDataToShader()
+{
+	ID3D12DescriptorHeap* sceneDescriptorHeaps[] = { _sceneDescriptorHeap.Get() };
+	_commandList->SetDescriptorHeaps(_countof(sceneDescriptorHeaps), sceneDescriptorHeaps);
+	_commandList->SetGraphicsRootDescriptorTable(0, _sceneDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+}
+
 //画面に描画していたものをクリアし、深度値を適応させて隠面消去を有効にする。
 // NOTE: リソース状態がレンダーターゲット状態に移行する。
-void DX12Wrapper::BeginRender() {
-
+void DX12Wrapper::BeginRender()
+{
 	//現在のバックバッファのインデックスを取得(現在、0番目、1番目どちらの画面バッファが裏画面か)
 	auto currentBackBuffIdx = _swapChain->GetCurrentBackBufferIndex();
 
@@ -402,8 +417,8 @@ void DX12Wrapper::BeginRender() {
 
 //溜め込んでいた命令を一気に、溜め込んだ順に実行していく。
 // NOTE: リソース状態が待機状態に移行する。
-void DX12Wrapper::EndRender() {
-
+void DX12Wrapper::EndRender()
+{
 	// NOTE: この関数内で新たにパイプラインを設定しているので、これ以降独自の命令を追加しないこと。
 	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), _commandList.Get());
 
@@ -439,17 +454,19 @@ void DX12Wrapper::EndRender() {
 	_commandList->Reset(_commandAllocator.Get(), nullptr);
 }
 
-void DX12Wrapper::Update() {
-	_mapSceneData->proj = XMMatrixPerspectiveFovLH(_fov, 1.f * _windowSize.cx / _windowSize.cy, 1.f, 100.f);
-	_mapSceneData->eyePos = _cameraPos;
+void DX12Wrapper::Update()
+{
+	_mapSceneData->proj     = XMMatrixPerspectiveFovLH(_fov, 1.f * _windowSize.cx / _windowSize.cy, 0.1f, 100.f);
+	_mapSceneData->eyePos   = _cameraPos;
 	_mapSceneData->lightDir = _lightDir;
 }
 
-void DX12Wrapper::Reset() {
-	_bgColor = _initBgColor;
-	_fov = _initFov;
+void DX12Wrapper::Reset()
+{
+	_bgColor   = _initBgColor;
+	_fov       = _initFov;
 	_cameraPos = _initCamera;
-	_lightDir = _initLightDir;
+	_lightDir  = _initLightDir;
 }
 
 ID3D12Device*                DX12Wrapper::GetDevice() const           { return _device.Get(); }
@@ -458,8 +475,3 @@ IDXGISwapChain4*             DX12Wrapper::GetSwapChain() const        { return _
 ComPtr<ID3D12DescriptorHeap> DX12Wrapper::GetDescHeapForImGui() const { return _descHeapForImGui; }
 
 void DX12Wrapper::SetViewPort(D3D12_VIEWPORT* view, D3D12_RECT* rect) { _viewPort = *view; _scissorRect = *rect; }
-void DX12Wrapper::SetSceneDataToShader() {
-	ID3D12DescriptorHeap* sceneDescriptorHeaps[] = { _sceneDescriptorHeap.Get() };
-	_commandList->SetDescriptorHeaps(_countof(sceneDescriptorHeaps), sceneDescriptorHeaps);
-	_commandList->SetGraphicsRootDescriptorTable(0, _sceneDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-}

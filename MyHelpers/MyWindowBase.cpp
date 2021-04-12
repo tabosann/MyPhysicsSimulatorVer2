@@ -19,6 +19,16 @@ MyWindowBase::~MyWindowBase()
 	assert(ShutDown());
 }
 
+POINT MyWindowBase::GetWindowPos() const
+{
+	return { _x, _y };
+}
+
+SIZE MyWindowBase::GetWindowSize() const
+{
+	return { _w, _h };
+}
+
 UINT MyWindowBase::GetMsg() const
 {
 	return _msg.message;
@@ -30,11 +40,11 @@ int MyWindowBase::GetCount()
 	return WndBase::_count;
 }
 
-bool MyWindowBase::Init(LPCWSTR name, int posX, int posY, int width, int height)
+bool MyWindowBase::Init(LPCWSTR name, LONG pos_x, LONG pos_y, LONG width, LONG height)
 {
 	_name = name;
-	_x = posX; _y = posY;
-	_width = width; _height = height;
+	_x = pos_x; _y = pos_y;
+	_w = width; _h = height;
 
 	//ウィンドウ詳細設定
 	_wndClass.cbSize = sizeof(WNDCLASSEX);
@@ -46,15 +56,15 @@ bool MyWindowBase::Init(LPCWSTR name, int posX, int posY, int width, int height)
 	if (!RegisterClassEx(&_wndClass)) return false;
 
 	//ウィンドウサイズ補正
-	RECT rect = { 0, 0, _width, _height };
+	RECT rect = { 0, 0, _w, _h };
 	if (!AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false)) return false;
-	_width = rect.right - rect.left;
-	_height = rect.bottom - rect.top;
+	_w = rect.right - rect.left;
+	_h = rect.bottom - rect.top;
 
 	//ウィンドウ作成
 	_hwnd = CreateWindow(
 		_wndClass.lpszClassName, _wndClass.lpszClassName, WS_OVERLAPPEDWINDOW,
-		_x, _y, _width, _height, NULL, NULL, _wndClass.hInstance, this
+		_x, _y, _w, _h, NULL, NULL, _wndClass.hInstance, this
 	);
 	if (!_hwnd) return false;
 
@@ -62,39 +72,23 @@ bool MyWindowBase::Init(LPCWSTR name, int posX, int posY, int width, int height)
 	return true;
 }
 
-//ウィンドウ表示
 bool MyWindowBase::Show() const
 {
 	return ::ShowWindow(_hwnd, SW_SHOW) ? true : false;
 }
 
-//ウィンドウの再描画
+//ウィンドウの再描画処理(WM_PAINT)を呼び出す
 bool MyWindowBase::Update() const
 {
 	return ::UpdateWindow(_hwnd) ? true : false;
 }
 
 // TODO: まだ試作品段階
-bool MyWindowBase::Close(unsigned short key) const
+void MyWindowBase::Close(unsigned short key) const
 {
 	BYTE keyState[256];
 	if (::GetKeyState(key))
-	{
 		::SendMessage(_hwnd, WM_CLOSE, 0, 0);
-		return true;
-	}
-	return false;
-}
-
-bool MyWindowBase::CatchMsg()
-{
-	if (::PeekMessage(&_msg, NULL, 0, 0, PM_REMOVE))
-	{
-		::TranslateMessage(&_msg);
-		::DispatchMessage(&_msg);
-		return true;
-	}
-	return false;
 }
 
 void MyWindowBase::Quit()
@@ -108,17 +102,20 @@ bool MyWindowBase::ShutDown() const
 	return true;
 }
 
-bool MyWindowBase::HelperForMsgProcess(MyWindowBase& wnd)
+void MyWindowBase::MsgProcessor(MyWindowBase* wnd)
 {
-	if (wnd.CatchMsg())
+	if (::PeekMessage(&wnd->_msg, NULL, 0, 0, PM_REMOVE))
 	{
-		if (wnd.GetMsg() == WM_QUIT)
-			wnd.Quit();
-		return true;
+		::TranslateMessage(&wnd->_msg);
+		::DispatchMessage(&wnd->_msg);
+
+		if (wnd->GetMsg() == WM_QUIT)
+			wnd->Quit();
 	}
-	return false;
 }
 
+//ウィンドウ作成時、lpParam = this にすることで、ウィンドウプロシージャをメンバ関数化できる！
+//静的なウィンドウプロシージャでthisポインタを得ることで実現。詳細は → https://bit.ly/3qNE8Ze
 LRESULT MyWindowBase::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	MyWindowBase* temp = (MyWindowBase*)::GetWindowLongPtr(hWnd, GWLP_USERDATA);
@@ -127,9 +124,10 @@ LRESULT MyWindowBase::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	if (temp) return temp->LocalWndProc(hWnd, msg, wParam, lParam);
 
 	//取得できなかった場合(ウィンドウ初期化時)
-	if (msg == WM_CREATE) {
-		temp = (MyWindowBase*)((LPCREATESTRUCT)lParam)->lpCreateParams;
-		if (temp) {
+	if (msg == WM_CREATE) 
+	{
+		if (temp = (MyWindowBase*)((LPCREATESTRUCT)lParam)->lpCreateParams)
+		{
 			::SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)temp);
 			return temp->LocalWndProc(hWnd, msg, wParam, lParam);
 		}
@@ -141,13 +139,27 @@ LRESULT MyWindowBase::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lP
 {
 	switch (msg)
 	{
+	case WM_MOVE: //ウィンドウの移動全般を扱う
+
+		_x = LOWORD(lParam);
+		_y = HIWORD(lParam);
+		break;
+
+	case WM_SIZE: //ウィンドウのリサイズ全般を扱う
+		
+		_w = LOWORD(lParam);
+		_h = HIWORD(lParam);
+		break;
+
 	case WM_CLOSE:
+
 		assert(::DestroyWindow(_hwnd));
 		break;
 
 	case WM_DESTROY:
+
 		::PostQuitMessage(0);
 		return 0;
 	}
-	return ::DefWindowProc(hWnd, msg, wParam, lParam);
+	return 0;
 }

@@ -1,25 +1,16 @@
-﻿//----------------------------------------------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------------------------------------------------------------------------
 //目次: 以下の「SECTION: ***」を検索すれば、その場所にジャンプできます。以下ジャンプの仕方です。
 //    : 「Ctrl + F」もしくは「編集→検索と置換→クイック検索」で検索ウィンドウが出現します。
 //    : そのウィンドウの検索欄で検索し、Enterを押すとジャンプできます。
 //    : 目次に戻るには「Ctrl + G」で「１」を行指定すると簡単に戻れます。
-//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------
 
-//初期化
-// SECTION: 初期化
-// SECTION: 物体配置
-
-//メインループ
-// SECTION: 編集
-// SECTION: 描画
-
-//後始末
-// SECTION: リリース
-
-//ImGuiによるコントロールセンター
-// SECTION: ImGui関数群
+// [SECTION] 初期化
+// [SECTION] 物体配置
+// [SECTION] メインループ
+// [SECTION] リリース
+// [SECTION] ImGui関数群
 // - 導入の詳細は → https://bit.ly/3rwZKJE / https://bit.ly/3u2RP8G
-
 
 //独自のヘッダ群
 #include<DX12Wrapper.h>
@@ -30,7 +21,7 @@
 #include<BS3.h>
 #include<Application.h>
 
-//ヘルパー
+//独自のヘルパー群
 #include<MyImGui.h>
 #include<MyChar32.h>
 
@@ -51,23 +42,6 @@ namespace //ウィンドウサイズ
 
 Application::Application() 
 {
-	//特になし
-	_MainFunc = []()->void {};
-}
-
-DX12Wrapper* Application::GetDX12() const
-{
-	return _dx12.get();
-}
-
-ObjectRenderer* Application::GetRenderer() const
-{
-	return _renderer.get();
-}
-
-void Application::SetMainFunc(void(*MainFunc)())
-{
-	_MainFunc = MainFunc;
 }
 
 Application& Application::Instance()
@@ -76,16 +50,12 @@ Application& Application::Instance()
 	return app;
 }
 
+//----------------------------------------------------------------------------------------------------------------------------------------
+// [SECTION] 初期化
+//----------------------------------------------------------------------------------------------------------------------------------------
 bool Application::Init() 
 {
-	auto result = CoInitializeEx(0, COINIT_MULTITHREADED);
-	if (FAILED(result)) return false;
-
-	//----------------------------------------------------------------------------------------------------------------------
-	// SECTION: 初期化
-	//----------------------------------------------------------------------------------------------------------------------
-	//メンバ変数の初期化
-	WndBase::Init(_T("MyPhysicsEngine ver0.2"), 0, 0, kWindowWidth, kWindowHeight);
+	WndBase::Init(_T("MyPhysicsEngine ver0.222"), 0, 0, kWindowWidth, kWindowHeight);
 
 	_dx12.reset(new DX12Wrapper(_hwnd, kWindowWidth, kWindowHeight));
 	if (!_dx12) return false;
@@ -111,9 +81,9 @@ bool Application::Init()
 		)
 		return false;
 
-	//----------------------------------------------------------------------------------------------------------------------
-	// SECTION: 物体配置
-	//----------------------------------------------------------------------------------------------------------------------
+	//------------------------------------------------------------------------------------------------------------------------------------
+	// [SECTION] 物体配置
+	//------------------------------------------------------------------------------------------------------------------------------------
 	//直方体の配置
 	MyRectangle* rectangles[] = {
 		new MyRectangle(_dx12.get(), "Left",
@@ -147,35 +117,20 @@ bool Application::Init()
 	return true;
 }
 
-void Application::BeginEdit() 
-{
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-}
-
-void Application::EndEdit() 
-{
-	for (auto rec : _rectangles) rec->Update();
-	for (auto sph : _spheres)    sph->Update();
-
-	//ここに更新処理を書いていく
-
-	_dx12->Update();
-}
-
-void Application::ImGui_Render()
-{
-	ImGui::Render();
-	_dx12->GetCmdList()->SetDescriptorHeaps(1, _dx12->GetDescHeapForImGui().GetAddressOf());
-}
-
+//----------------------------------------------------------------------------------------------------------------------------------------
+// [SECTION] メインループ
+//----------------------------------------------------------------------------------------------------------------------------------------
 void Application::Run()
 {
-	////ウィンドウの設定
-	//static ImGuiWindowFlags windowFlags = 0;
-	//windowFlags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
-	//windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
+	//衝突検知時にアニメーションを停止する
+	void (*StopWhenCollided)(bool& dst, bool src) = [](bool& dst, bool src)->void {
+		dst = !src && dst;
+	};
+
+	//ウィンドウの設定
+	static ImGuiWindowFlags windowFlags = 0;
+	windowFlags |= ImGuiWindowFlags_AlwaysUseWindowPadding;
+	windowFlags |= ImGuiWindowFlags_AlwaysAutoResize;
 
 	WndBase::Show();
 	WndBase::Update();
@@ -183,34 +138,26 @@ void Application::Run()
 	while (WndBase::GetCount() != 0) {
 		//メッセージ受け取ると0以外の値(= true)を返す。詳細は→ https://bit.ly/3vStQe0
 		//e.g. ウィンドウを閉じるとWM_CLOSEメッセージを受け取るので0以外の値(= true)を返す。
-		if (WndBase::CatchMsg())
-		{
-			if (WndBase::GetMsg() == WM_QUIT)
-				WndBase::Quit();
-			continue;
-		}
+		WndBase::MsgProcessor(this);
+		WndBase::Close(VK_SPACE);
 
-		if (WndBase::Close(VK_SPACE))
-			continue;
-
-		_MainFunc();
-
-		//----------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------------------
 		// SECTION: 編集
-		//----------------------------------------------------------------------------------------------------------------------
-#if false
+		//--------------------------------------------------------------------------------------------------------------------------------
 		BeginEdit();
 
-		//==========================================================================================================
+		//----------------------------------------------------------------------------------------------------------
 		//以下の方法で衝突位置を計算する。詳細は → 「書籍：実例で学ぶゲーム3D数学」
 		// - 求めるべき衝突の瞬間の位置や速度は、最小の衝突時刻を採用して求めればそれっぽく見えることを利用。
 		// - (1) 球と球、球と壁など、様々な衝突を考え、それぞれの場合から衝突時刻'step_now'を算出。
 		// - (2) その衝突時刻'step_now'が今までで求めた衝突時刻'step_min'より小さければ'step_min'を'step_now'に更新。
 		// - (3) (1)(2)をforループすれば、最終的に最小の衝突時刻'step_min'で次の位置や速度を算出する形になる。
-		//==========================================================================================================
+		//----------------------------------------------------------------------------------------------------------
 
-		if (_play) {
-
+		static bool play = false;
+		static bool stopWhenCollided = false;
+		if (play) 
+		{
 			for (auto rec : _rectangles) rec->BeginCalc();
 			for (auto sph : _spheres)    sph->BeginCalc();
 
@@ -223,15 +170,15 @@ void Application::Run()
 				// (1) 球と球、球と壁など、様々な衝突を考え、それぞれの場合から衝突時刻'step_now'を算出。
 				//--------------------------------------------------------------------------------------
 
-				MyVector3 outV1, outV2; //衝突時の速度
-				MyVector3 outP1, outP2; //衝突時の位置
+				MyVector3 out_v1, out_v2; //衝突時の速度
+				MyVector3 out_p1, out_p2; //衝突時の位置
 				float     step = 0;     //衝突時刻
 
 				//球と球の衝突が起きたらtrue
 				bool isCollision = s1->_bs3->IntersectsBS3(
 					s1->_acc, s1->_vel, s1->_pos, s1->_r, s1->_dt,
 					s2->_acc, s2->_vel, s2->_pos, s2->_r, s2->_dt,
-					outV1, outV2, outP1, outP2, step
+					out_v1, out_v2, out_p1, out_p2, step
 				);
 
 				//衝突が起こらなければ、衝突処理をスキップ
@@ -243,15 +190,19 @@ void Application::Run()
 				// (2) その衝突時刻'step_now'が今までで求めた衝突時刻'step_min'より小さければ'step_min'を'step_now'に更新。
 				//--------------------------------------------------------------------------------------------------------
 
+				StopWhenCollided(play, stopWhenCollided);
+
 				//衝突時刻を更新
 				s1->_t = s2->_t = step;
-				//衝突位置を更新
-				s1->_tempPos = outP1; s2->_tempPos = outP2;
 				//衝突直後の速度を算出し、更新する
 				MyPhysics::CalcReflectionVector(
-					outV1, outV2, outP1, outP2, s1->_m, s2->_m, s1->_e, s2->_e,
+					out_v1, out_v2, out_p1, out_p2, s1->_m, s2->_m, s1->_e, s2->_e,
 					s1->_tempVel, s2->_tempVel
 				);
+				//衝突位置を更新
+				//s1->_tempPos = s1->GetPositionIn((1 - step) * s1->_dt, s1->_acc, s1->_tempVel);
+				//s2->_tempPos = s2->GetPositionIn((1 - step) * s2->_dt, s2->_acc, s2->_tempVel);
+				s1->_tempPos = out_p1; s2->_tempPos = out_p2;
 			}}
 
 			//以下同様に衝突演算を行う
@@ -279,6 +230,8 @@ void Application::Run()
 				if (!isCollision) continue;
 				if (step >= s->_t || step >= r->_t) continue;
 
+				StopWhenCollided(play, stopWhenCollided);
+
 				r->_t = s->_t = step;
 				s->_tempPos = outPos;
 				s->_tempVel = MyPhysics::CalcReflectionVector(
@@ -293,15 +246,16 @@ void Application::Run()
 			for (auto rec : _rectangles) rec->EndCalc();
 			for (auto sph : _spheres)    sph->EndCalc();
 		}
-		else {
+		else 
+		{
 			//_play == false: 衝突演算をスキップ
 		}
 
-		//===============================================================
+		//---------------------------------------------------------------
 		//ImGuiの編集
 		// - 物体の配置、カメラアングルなどを変更しやすいようにしている。
 		// - ImGui::ShowDemoWindow()の実装を見ると、仕組みがわかりやすい。
-		//===============================================================
+		//---------------------------------------------------------------
 
 		static bool showDemo = false;
 		static bool showDebug = false;
@@ -312,6 +266,7 @@ void Application::Run()
 			if (ImGui::BeginMenu("Setting")) {
 				if (ImGui::MenuItem("Show Demo"))     showDemo = !showDemo;
 				if (ImGui::MenuItem("Debug Console")) showDebug = !showDebug;
+				ImGui::Checkbox("Stop When Collided", &stopWhenCollided);
 				ImGui::EndMenu();
 			}
 			if (ImGui::BeginMenu("Edit")) {
@@ -322,8 +277,8 @@ void Application::Run()
 
 			ImGui::Dummy(ImVec2(ImGui::GetWindowContentRegionWidth() * 0.7f, 0));
 
-			Char32 text = _play ? "Stop" : "Play";
-			if (ImGui::Button(text, ImVec2(100, 0))) _play = !_play;
+			Char32 text = play ? "Stop" : "Play";
+			if (ImGui::Button(text, ImVec2(100, 0))) play = !play;
 
 			text = "All Reset";
 			if (ImGui::Button(text, ImVec2(100, 0))) {
@@ -356,9 +311,9 @@ void Application::Run()
 
 		EndEdit();
 
-		//----------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------------------
 		// SECTION: 描画
-		//----------------------------------------------------------------------------------------------------------------------
+		//--------------------------------------------------------------------------------------------------------------------------------
 		_dx12->BeginRender();
 		
 		//独自のパイプラインを設定
@@ -378,30 +333,28 @@ void Application::Run()
 		_dx12->EndRender();
 
 		_dx12->GetSwapChain()->Present(1 /* = 垂直同期あり */, 0);
-#endif
 	}
 }
 
-void Application::ShutDown() {
-	//----------------------------------------------------------------------------------------------------------------------
-	// SECTION: リリース
-	//----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------------------------
+// [SECTION] リリース
+//----------------------------------------------------------------------------------------------------------------------------------------
+void Application::ShutDown() 
+{
 	ImGui_ImplDX12_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 }
 
-Application::~Application()
+//----------------------------------------------------------------------------------------------------------------------------------------
+// [SECTION] ImGui関数群
+//----------------------------------------------------------------------------------------------------------------------------------------
+void Application::ImGui_Render()
 {
-	for (int i = 0; i < _rectangles.size(); ++i) delete _rectangles[i];
-	for (int i = 0; i < _spheres.size(); ++i)    delete _spheres[i];
-	vector<MyRectangle*>().swap(_rectangles);
-	vector<MySphere*>().swap(_spheres);
+	ImGui::Render();
+	_dx12->GetCmdList()->SetDescriptorHeaps(1, _dx12->GetDescHeapForImGui().GetAddressOf());
 }
 
-//----------------------------------------------------------------------------------------------------------------------
-// SECTION: ImGui関数群
-//----------------------------------------------------------------------------------------------------------------------
 void Application::ShowDebugConsoleMenu() 
 {
 	XMFLOAT4 clearColor4 = _dx12->_bgColor;
@@ -414,10 +367,10 @@ void Application::ShowDebugConsoleMenu()
 	ImGui::InputFloat3("Camera"    , &camera3.x);
 	ImGui::InputFloat3("Light Dir" , &lightDir4.x);
 
-	_dx12->_bgColor = clearColor4;
-	_dx12->_fov = fov;
+	_dx12->_bgColor   = clearColor4;
+	_dx12->_fov       = fov;
 	_dx12->_cameraPos = camera3;
-	_dx12->_lightDir = lightDir4;
+	_dx12->_lightDir  = lightDir4;
 }
 
 void Application::ShowSupervisorMenu() 
@@ -550,23 +503,49 @@ void Application::ShowCreatorMenu()
 	}
 }
 
+Application::~Application()
+{
+	for (int i = 0; i < _rectangles.size(); ++i) delete _rectangles[i];
+	for (int i = 0; i < _spheres.size(); ++i)    delete _spheres[i];
+	vector<MyRectangle*>().swap(_rectangles);
+	vector<MySphere*>().swap(_spheres);
+}
+
+//----------------------------------------------------------------------------------------------------------------------------------------
+//
+// [SECTION] 非公開
+//
+//----------------------------------------------------------------------------------------------------------------------------------------
+void Application::BeginEdit()
+{
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+}
+
+void Application::EndEdit()
+{
+	for (auto rec : _rectangles) rec->Update();
+	for (auto sph : _spheres)    sph->Update();
+
+	//ここに更新処理を書いていく
+
+	_dx12->Update();
+}
+
 LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) 
 {
 	switch (msg) 
 	{
 	case WM_SIZE: //ウィンドウリサイズ
 
-		DXGI_SWAP_CHAIN_DESC1 desc; ZeroMemory(&desc, sizeof(DXGI_SWAP_CHAIN_DESC1));
+		DXGI_SWAP_CHAIN_DESC1 desc = {};
 		_dx12->GetSwapChain()->GetDesc1(&desc);
 
-		RECT wrc; ZeroMemory(&wrc, sizeof(RECT));
-		if (!GetWindowRect(_hwnd, &wrc)) break;
-
-		_dx12->_windowSize.cx = wrc.right - wrc.left;
-		_dx12->_windowSize.cy = wrc.bottom - wrc.top;
-		_dx12->GetSwapChain()->ResizeBuffers(desc.BufferCount, wrc.right - wrc.left, wrc.bottom - wrc.top, desc.Format, desc.Flags);
+		_dx12->_windowSize = WndBase::GetWindowSize();
+		_dx12->GetSwapChain()->ResizeBuffers(desc.BufferCount, _dx12->_windowSize.cx, _dx12->_windowSize.cy, desc.Format, desc.Flags);
 		
-		D3D12_VIEWPORT view; ZeroMemory(&view, sizeof(D3D12_VIEWPORT));
+		D3D12_VIEWPORT view = {};
 		view.Width    = (float)desc.Width;
 		view.Height   = (float)desc.Height;
 		view.TopLeftX = 0.f;
@@ -574,7 +553,7 @@ LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 		view.MaxDepth = 1.f;
 		view.MinDepth = 0.f;
 
-		D3D12_RECT rect; ZeroMemory(&rect, sizeof(D3D12_RECT));
+		D3D12_RECT rect = {};
 		rect.left   = 0;
 		rect.top    = 0;
 		rect.right  = rect.left + desc.Width;
@@ -582,14 +561,12 @@ LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 		_dx12->SetViewPort(&view, &rect);
 		break;
-
-	case WM_DESTROY: //ウィンドウ破棄
-		::PostQuitMessage(0);
-		return 0;
 	}
 
 	ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam);
-	return WndBase::LocalWndProc(hWnd, msg, wParam, lParam);
+	WndBase::LocalWndProc(hWnd, msg, wParam, lParam);
+
+	return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 ////lpParam = this にすることで、ウィンドウプロシージャをメンバ関数化できる！

@@ -14,9 +14,16 @@ namespace {
 int MySphere::_id = 0;
 
 MySphere::MySphere(
-	DX12Wrapper* dx12, const Char32& name,
-	const MyVec3& acc, const MyVec3& vel, const MyVec3& pos,
-	float r, float m, float e, int frames, const MyVec3& col
+	DX12Wrapper*  dx12, 
+	const Char32& name,
+	const MyVec3& acc, 
+	const MyVec3& vel, 
+	const MyVec3& pos,
+	float         r, 
+	float         m, 
+	float         e, 
+	int           frames, 
+	const MyVec3& col
 )
 	:BasicObject(dx12, name, MyVec3(_r, _r, _r * 0.5f), m, e, col), MyPhysics(frames, acc, vel, pos),
 	_r(r), _t(1.f), _tempPos(pos), _tempVel(vel)
@@ -40,40 +47,54 @@ MySphere::MySphere(
 }
 
 MySphere::MySphere(
-	DX12Wrapper* dx12,
-	const MyVec3& acc, const MyVec3& vel, const MyVec3& pos, 
-	float r, float m, float e, int frames, const MyVec3& col
+	DX12Wrapper*  dx12,
+	const MyVec3& acc, 
+	const MyVec3& vel, 
+	const MyVec3& pos, 
+	float         r, 
+	float         m, 
+	float         e, 
+	int           frames, 
+	const MyVec3& col
 )
 	:MySphere(dx12, "", acc, vel, pos, r, m, e, frames, col)
 {
-	Char32::Copy(_name, "Sphere(%d)", MySphere::_id++);
+	Char32::Copy(_name, "Sphere(%d)", _id++);
 }
 
-void MySphere::BeginCalc() {
+void MySphere::BeginCalc() 
+{
 	_t = 1.f;
 	_tempPos = GetPositionIn(_dt);
 	_tempVel = GetVelocityIn(_dt);
 }
 
 void MySphere::Update() {
-	//物体の大きさ、位置を設定
+	//物体の大きさ、位置を更新
 	_mappedTransform->world  = XMMatrixIdentity();
 	_mappedTransform->world *= XMMatrixScaling(_r, _r, _r * 0.5f);
 	_mappedTransform->world *= XMMatrixTranslation(_pos.x, _pos.y, _pos.z);
-	//物体の色を設定
+	//物体の色を更新
 	_mappedTransform->color.x = _color.x;
 	_mappedTransform->color.y = _color.y;
 	_mappedTransform->color.z = _color.z;
 }
 
-void MySphere::EndCalc() {
+void MySphere::EndCalc() 
+{
 	_pos = _tempPos;
 	_vel = _tempVel;
+	_bs3->_c = _pos;
+	_bs3->_r = _r;
 }
 
-void MySphere::Render() const { BasicObject::Render(); }
+void MySphere::Render() const 
+{
+	BasicObject::Render();
+}
 
-void MySphere::Adjuster() {
+void MySphere::Adjuster() 
+{
 	Char32 name   = _name;
 	MyVec3 acc    = _acc;
 	MyVec3 vel    = _vel;
@@ -95,7 +116,8 @@ void MySphere::Adjuster() {
 	if (ImGui::ColorEdit3 ("Color" , &col.x))                _color = col;
 }
 
-void MySphere::Reset() {
+void MySphere::Reset() 
+{
 	_acc   = _init_acc;
 	_vel   = _init_vel;
 	_pos   = _init_pos;
@@ -106,7 +128,8 @@ void MySphere::Reset() {
 	_color = _init_color;
 }
 
-HRESULT MySphere::CreateVertexBufferView() {
+HRESULT MySphere::CreateVertexBufferView() 
+{
 	constexpr int vertex_num = U_MAX * (V_MAX + 1);
 	Vertex verticesOfSphere[vertex_num];
 
@@ -122,7 +145,8 @@ HRESULT MySphere::CreateVertexBufferView() {
 		begin(verticesOfSphere), end(verticesOfSphere), sizeof(Vertex) * vertex_num);
 }
 
-HRESULT MySphere::CreateIndexBufferView() {
+HRESULT MySphere::CreateIndexBufferView() 
+{
 	constexpr int index_num = 2 * V_MAX * (U_MAX + 1);
 	unsigned short indicesOfSphere[index_num];
 

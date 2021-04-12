@@ -1,18 +1,28 @@
 #pragma once
 
-class DX12Wrapper {
+class DX12Wrapper 
+{
 	template<class T>
 	using ComPtr = Microsoft::WRL::ComPtr<T>;
+	using XMFLOAT3 = DirectX::XMFLOAT3;
+	using XMFLOAT4 = DirectX::XMFLOAT4;
+	using XMMATRIX = DirectX::XMMATRIX;
 
 public:
-	SIZE              _windowSize;
-	DirectX::XMFLOAT4 _bgColor, _initBgColor;
-	float             _fov       , _initFov;
-	DirectX::XMFLOAT3 _cameraPos , _initCamera;
-	DirectX::XMFLOAT4 _lightDir  , _initLightDir; //アライメント防止のXMFLOAT4
+
+	SIZE     _windowSize;
+	XMFLOAT4 _bgColor;
+	float    _fov;
+	XMFLOAT3 _cameraPos;
+	XMFLOAT4 _lightDir; //アライメント防止のXMFLOAT4
 
 	DX12Wrapper(HWND hwnd, int width, int height);
-	virtual ~DX12Wrapper();
+
+	void SetSceneDataToShader();
+	void BeginRender();
+	void EndRender();
+	void Update();
+	void Reset();
 
 	ID3D12Device*                GetDevice() const;
 	ID3D12GraphicsCommandList*   GetCmdList() const;
@@ -20,14 +30,16 @@ public:
 	ComPtr<ID3D12DescriptorHeap> GetDescHeapForImGui() const;
 
 	void SetViewPort(D3D12_VIEWPORT* view, D3D12_RECT* rect);
-	void SetSceneDataToShader();
 
-	void BeginRender();
-	void EndRender();
-	void Update();
-	void Reset();
+	virtual ~DX12Wrapper();
 
 private:
+
+	XMFLOAT4 _initBgColor;
+	float    _initFov;
+	XMFLOAT3 _initCamera;
+	XMFLOAT4 _initLightDir;
+
 	//DXGI関連
 	ComPtr<IDXGIFactory6>   _dxgiFactory = nullptr;
 	ComPtr<IDXGISwapChain4> _swapChain = nullptr;
@@ -50,10 +62,10 @@ private:
 
 	//ビュープロジェクション関連
 	struct SceneData {
-		DirectX::XMMATRIX view;
-		DirectX::XMMATRIX proj;
-		DirectX::XMFLOAT3 eyePos;
-		DirectX::XMFLOAT4 lightDir;
+		XMMATRIX view;
+		XMMATRIX proj;
+		XMFLOAT3 eyePos;
+		XMFLOAT4 lightDir;
 	};
 	SceneData*                   _mapSceneData = nullptr;
 	ComPtr<ID3D12Resource>       _sceneBuffer = nullptr;
@@ -79,6 +91,9 @@ private:
 	HRESULT CreateFinalRenderTarget();
 	HRESULT CreateDepthStencilView();
 	HRESULT CreateSceneDataViewWithCBV();
+
+	DX12Wrapper(const DX12Wrapper&) = delete;
+	DX12Wrapper& operator=(const DX12Wrapper&) = delete;
 };
 
 extern const float kSkyColor4[4];
