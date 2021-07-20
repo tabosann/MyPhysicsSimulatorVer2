@@ -42,6 +42,7 @@ namespace //ウィンドウサイズ
 
 Application::Application() 
 {
+	//特になし
 }
 
 Application& Application::Instance()
@@ -85,22 +86,13 @@ bool Application::Init()
 	// [SECTION] 物体配置
 	//------------------------------------------------------------------------------------------------------------------------------------
 	//直方体の配置
-	MyRectangle* rectangles[] = {
-		new MyRectangle(_dx12.get(), "Left",
-						kZeroVec, kZeroVec, MyVec3(-8.0f,  0.0f,  0.0f), MyVec3( 1.0f, 15.0f,  5.0f), 1.0f, 0.75f
-		),
-		new MyRectangle(_dx12.get(), "Right",
-						kZeroVec, kZeroVec, MyVec3( 8.0f,  0.0f,  0.0f), MyVec3( 1.0f, 15.0f,  5.0f), 1.0f, 0.75f
-		),
-		new MyRectangle(_dx12.get(), "Far",
-						kZeroVec, kZeroVec, MyVec3( 0.0f,  0.0f,  3.0f), MyVec3(15.0f, 15.0f,  1.0f), 1.0f, 0.75f
-		),
-		new MyRectangle(_dx12.get(), "Top",
-						kZeroVec, kZeroVec, MyVec3( 0.0f,  7.0f,  0.0f), MyVec3(15.0f,  1.0f,  5.0f), 1.0f, 0.75f
-		),
-		new MyRectangle(_dx12.get(), "Bottom",
-						kZeroVec, kZeroVec, MyVec3( 0.0f, -7.0f,  0.0f), MyVec3(15.0f,  1.0f,  5.0f), 1.0f, 0.75f
-		)
+	MyRectangle* rectangles[] =
+	{
+		new MyRectangle(_dx12.get(), "Left"  , kZeroVec, kZeroVec, MyVec3(-8.0f,  0.0f,  0.0f), MyVec3( 1.0f, 15.0f,  5.0f), 1.0f, 0.75f),
+		new MyRectangle(_dx12.get(), "Right" , kZeroVec, kZeroVec, MyVec3( 8.0f,  0.0f,  0.0f), MyVec3( 1.0f, 15.0f,  5.0f), 1.0f, 0.75f),
+		new MyRectangle(_dx12.get(), "Far"   , kZeroVec, kZeroVec, MyVec3( 0.0f,  0.0f,  3.0f), MyVec3(15.0f, 15.0f,  1.0f), 1.0f, 0.75f),
+		new MyRectangle(_dx12.get(), "Top"   , kZeroVec, kZeroVec, MyVec3( 0.0f,  7.0f,  0.0f), MyVec3(15.0f,  1.0f,  5.0f), 1.0f, 0.75f),
+		new MyRectangle(_dx12.get(), "Bottom", kZeroVec, kZeroVec, MyVec3( 0.0f, -7.0f,  0.0f), MyVec3(15.0f,  1.0f,  5.0f), 1.0f, 0.75f)
 	};
 	_rectangles.assign(rectangles, end(rectangles));
 
@@ -108,7 +100,8 @@ bool Application::Init()
 	//e.g. v0(30.f, 20.f, 0.f), v1(-20.f, 20.f, 0.f), p0(-2.5f, 0.f, 0.f), p1(2.5f, 0.f, 0.f)だといい感じに検証できる。
 	const MyVec3 v0(30.f, 20.f, 0.f); const MyVec3 v1(-20.f, 20.f, 0.f);
 	const MyVec3 p0(-2.5f, 0.f, 0.f); const MyVec3 p1(2.5f, 0.f, 0.f);
-	MySphere* spheres[] = {
+	MySphere* spheres[] = 
+	{
 		new MySphere(_dx12.get(), kGravity, v0, p0, 0.5f, 1.0f, 0.75f),
 		new MySphere(_dx12.get(), kGravity, v1, p1, 0.5f, 1.0f, 0.75f)
 	};
@@ -123,7 +116,8 @@ bool Application::Init()
 void Application::Run()
 {
 	//衝突検知時にアニメーションを停止する
-	void (*StopWhenCollided)(bool& dst, bool src) = [](bool& dst, bool src)->void {
+	void (*StopWhenCollided)(bool& dst, bool src) = [](bool& dst, bool src)->void
+	{
 		dst = !src && dst;
 	};
 
@@ -135,12 +129,32 @@ void Application::Run()
 	WndBase::Show();
 	WndBase::Update();
 
-	while (WndBase::GetCount() != 0) {
+	while (WndBase::GetCount() != 0)
+	{
 		//メッセージ受け取ると0以外の値(= true)を返す。詳細は→ https://bit.ly/3vStQe0
 		//e.g. ウィンドウを閉じるとWM_CLOSEメッセージを受け取るので0以外の値(= true)を返す。
 		WndBase::MsgProcessor(this);
 		WndBase::Close(VK_SPACE);
 
+		BeginEdit();
+		{
+			_EditFunc();
+		}
+		EndEdit();
+
+		_dx12->BeginRender();
+		{
+			_dx12->GetCmdList()->SetGraphicsRootSignature(_renderer->GetRootSignature());
+			_dx12->GetCmdList()->SetPipelineState(_renderer->GetGraphicPipeline());
+			_dx12->SetSceneDataToShader();
+
+			_RenderFunc();
+
+			ImGui_Render();
+		}
+		_dx12->EndRender();
+
+#if false
 		//--------------------------------------------------------------------------------------------------------------------------------
 		// SECTION: 編集
 		//--------------------------------------------------------------------------------------------------------------------------------
@@ -331,6 +345,7 @@ void Application::Run()
 		ImGui_Render();
 
 		_dx12->EndRender();
+#endif
 
 		_dx12->GetSwapChain()->Present(1 /* = 垂直同期あり */, 0);
 	}
@@ -386,36 +401,41 @@ void Application::ShowSupervisorMenu()
 
 	ImGui::HelpMarker("Delete Menu is shown by right-click on selected item.");
 
-	if (ImGui::BeginListBox("", ImVec2(kWidth, kHeight))) {
+	if (ImGui::BeginListBox("", ImVec2(kWidth, kHeight)))
+	{
 		//MyRectangleアイテムの選択
-		for (int i = 0; i < _rectangles.size(); ++i) {
-
+		for (int i = 0; i < _rectangles.size(); ++i)
+		{
 			BasicObject* item = _rectangles[i];
 			Char32 label = item->_name;
 
 			bool selected = (label == selectedLabel);
-			if (ImGui::Selectable(label, selected) || selected) {
+			if (ImGui::Selectable(label, selected) || selected)
+			{
 				selectedLabel = label;
 				selectedItem = item;
 
-				if (ImGui::AskToDelete(_rectangles, i)) {
+				if (ImGui::AskToDelete(_rectangles, i))
+				{
 					selectedLabel = "";
 					selectedItem = nullptr;
 				}
 			}
 		}
 		//MySphereアイテムの選択
-		for (int i = 0; i < _spheres.size(); ++i) {
-
+		for (int i = 0; i < _spheres.size(); ++i)
+		{
 			BasicObject* item = _spheres[i];
 			Char32 label = item->_name;
 
 			bool selected = (label == selectedLabel);
-			if (ImGui::Selectable(label, selected) || selected) {
+			if (ImGui::Selectable(label, selected) || selected)
+			{
 				selectedLabel = label;
 				selectedItem = item;
 
-				if (ImGui::AskToDelete(_spheres, i)) {
+				if (ImGui::AskToDelete(_spheres, i))
+				{
 					selectedLabel = "";
 					selectedItem = nullptr;
 				}
@@ -437,13 +457,15 @@ void Application::ShowSupervisorMenu()
 	ImGui::Text(selectedLabel);
 	ImGui::Separator();
 
-	if (selectedItem != nullptr) {
+	if (selectedItem != nullptr)
+	{
 		Char32 prev = selectedItem->_name;
 		selectedItem->Adjuster();
 		Char32 aftr = selectedItem->_name;
 
 		// FIXME: アイテム名被りをなくすための措置だが、アイテム名の点滅が起こる...
-		if (aftr != prev) {
+		if (aftr != prev)
+		{
 			selectedItem->_name = prev;
 			selectedLabel = selectedItem->_name = ImGui::CreateUniqueItemName(itemList, aftr);
 		}
@@ -459,8 +481,10 @@ void Application::ShowCreatorMenu()
 
 	//BeginMenu()  : すぐUIが上書きされて使いづらい
 	//BeginTabBar(): ラベル付けのようで使いやすい
-	if (ImGui::BeginTabBar("GameObjectTabs")) {
-		if (ImGui::BeginTabItem("Rectangle")) {
+	if (ImGui::BeginTabBar("GameObjectTabs"))
+	{
+		if (ImGui::BeginTabItem("Rectangle"))
+		{
 			static Char32 label("Rectangle");   ImGui::InputText  ("Name"   , label.data(), Char32::_kLength);
 			static MyVec3 acl(0.f, -9.8f, 0.f); ImGui::InputFloat3("Accel"  , &acl.x);
 			static MyVec3 vel;                  ImGui::InputFloat3("Veloc"  , &vel.x);
@@ -480,7 +504,8 @@ void Application::ShowCreatorMenu()
 			ImGui::EndTabItem();
 		}
 
-		if (ImGui::BeginTabItem("Sphere")) {
+		if (ImGui::BeginTabItem("Sphere"))
+		{
 			static Char32 label("Sphere");      ImGui::InputText  ("Name"   , label.data(), Char32::_kLength);
 			static MyVec3 acl(0.f, -9.8f, 0.f); ImGui::InputFloat3("Accel"  , &acl.x);
 			static MyVec3 vel;                  ImGui::InputFloat3("Veloc"  , &vel.x);
@@ -499,6 +524,7 @@ void Application::ShowCreatorMenu()
 
 			ImGui::EndTabItem();
 		}
+
 		ImGui::EndTabBar();
 	}
 }
@@ -568,6 +594,13 @@ LRESULT Application::LocalWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 	return ::DefWindowProc(hWnd, msg, wParam, lParam);
 }
+
+DX12Wrapper* Application::GetDX12() const { return _dx12.get(); }
+
+void Application::SetRectangleObjects(MyRectangle** begin, MyRectangle** end) { _rectangles.assign(begin, end); }
+void Application::SetSphereObjects(MySphere** begin, MySphere** end)          { _spheres.assign(begin, end); }
+void Application::SetEditFunc(void(*EditFunc)())                            { _EditFunc = EditFunc; }
+void Application::SetRenderFunc(void(*RenderFunc)())                        { _RenderFunc = RenderFunc; }
 
 ////lpParam = this にすることで、ウィンドウプロシージャをメンバ関数化できる！
 ////静的なウィンドウプロシージャでthisポインタを得ることで実現。詳細は → https://bit.ly/3qNE8Ze

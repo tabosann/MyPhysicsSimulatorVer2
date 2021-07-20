@@ -71,7 +71,8 @@ HRESULT DX12Wrapper::CreateDXGIAndDevice(const wstring& targetAdapterName)
 #endif
 	assert(SUCCEEDED(result));
 
-	D3D_FEATURE_LEVEL featureLevels[] = {
+	D3D_FEATURE_LEVEL featureLevels[] = 
+	{
 		D3D_FEATURE_LEVEL_12_1,
 		D3D_FEATURE_LEVEL_12_0,
 		D3D_FEATURE_LEVEL_11_1, //Macbook Air 2017 ‚Í‚±‚ê

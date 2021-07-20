@@ -3,12 +3,16 @@
 #include"../ImGui/imgui.h"
 #include<MyChar32.h>
 
+class Application;
+
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace ImGui
 {
 	bool IsAtShiftTrueToFalse(bool judge);
 	void HelpMarker(const char* desc);
+	void PlayButton(bool& play);
+	void ResetButton(Application* app);
 }
 
 //テンプレート関数群

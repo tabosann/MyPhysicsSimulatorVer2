@@ -28,6 +28,9 @@
 #include"../ImGui/imgui_impl_win32.h"
 #include"../ImGui/imgui_impl_dx12.h"
 
+#pragma comment(lib, "d3d12.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "DirectXTex.lib")
 
 #define _USE_DEVELOP_VER_ false
