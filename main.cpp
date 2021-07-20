@@ -38,7 +38,7 @@ int main()
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 #endif
-	if (!ImportObjectParamsFromExel()) return -1;
+	//if (!ImportObjectParamsFromExel()) return -1;
 	if (!app.Init()) return -1;
 
 	app.SetEditFunc(::Edit);
